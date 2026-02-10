@@ -14,8 +14,6 @@ import {
 import {
   Dashboard as DashboardIcon,
   Calculate as CalculateIcon,
-  People as PeopleIcon,
-  Kitchen as KitchenIcon,
   Assignment as AssignmentIcon,
   Coffee as CoffeeIcon,
   AccountBalance as AccountBalanceIcon,
