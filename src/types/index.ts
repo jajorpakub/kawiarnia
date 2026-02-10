@@ -4,7 +4,7 @@ export interface CostEstimateItem {
   quantity: number;
   unitPrice: number;
   total: number;
-  category?: string;
+  notes?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -15,7 +15,6 @@ export interface Supplier {
   contact: string;
   email: string;
   phone: string;
-  category?: string;
   notes?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -28,6 +27,7 @@ export interface Equipment {
   unitPrice: number;
   supplier?: string;
   status?: 'pending' | 'ordered' | 'received';
+  notes?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -40,6 +40,7 @@ export interface Task {
   status?: 'todo' | 'in-progress' | 'done';
   dueDate?: Date;
   priority?: 'low' | 'medium' | 'high';
+  notes?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -67,6 +68,30 @@ export interface CalendarEvent {
   endDate: Date;
   category?: 'inspection' | 'meeting' | 'deadline' | 'other';
   color?: string;
+  notes?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Location {
+  id: string;
+  street: string;
+  squareMeters: number;
+  monthlyRent: number;
+  link?: string;
+  status?: 'viewing' | 'interested' | 'negotiating' | 'rejected';
+  notes?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  category: 'beverage' | 'dessert' | 'snack' | 'main' | 'breakfast' | 'other';
+  dietary?: 'vegan' | 'vegetarian' | 'none';
+  price?: number;
   notes?: string;
   createdAt?: Date;
   updatedAt?: Date;

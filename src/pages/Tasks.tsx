@@ -9,24 +9,53 @@ const Tasks: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Task>>({
-    title: '', description: '', assignedTo: '', status: 'todo', priority: 'medium', dueDate: undefined
+    title: '', description: '', assignedTo: '', status: 'todo', priority: 'medium', dueDate: undefined, notes: ''
   });
 
   const handleOpen = (task?: Task) => {
-    if (task) { setEditingId(task.id); setFormData(task); }
-    else { setEditingId(null); setFormData({ title: '', description: '', assignedTo: '', status: 'todo', priority: 'medium', dueDate: undefined }); }
+    if (task) { 
+      setEditingId(task.id); 
+      setFormData(task); 
+    } else { 
+      setEditingId(null); 
+      setFormData({ 
+        title: '', 
+        description: '', 
+        assignedTo: '', 
+        status: 'todo', 
+        priority: 'medium', 
+        dueDate: undefined, 
+        notes: '' 
+      }); 
+    }
     setOpen(true);
   };
 
   const handleClose = () => { setOpen(false); setEditingId(null); };
 
   const handleSave = async () => {
-    if (!formData.title) { alert('Proszę podać tytuł'); return; }
+    if (!formData.title) { window.alert('Proszę podać tytuł'); return; }
     try {
-      if (editingId) { await updateTask(editingId, formData); }
-      else { await addTask({ title: formData.title!, description: formData.description, assignedTo: formData.assignedTo, status: formData.status || 'todo', priority: formData.priority || 'medium', dueDate: formData.dueDate }); }
+      const taskData = {
+        title: formData.title || '',
+        description: formData.description || '',
+        assignedTo: formData.assignedTo || '',
+        status: (formData.status || 'todo') as 'todo' | 'in-progress' | 'done',
+        priority: (formData.priority || 'medium') as 'low' | 'medium' | 'high',
+        dueDate: formData.dueDate,
+        notes: formData.notes || ''
+      };
+      
+      if (editingId) {
+        await updateTask(editingId, taskData);
+      } else {
+        await addTask(taskData);
+      }
       handleClose();
-    } catch (error) { console.error('Error:', error); }
+    } catch (error) { 
+      console.error('Error saving task:', error); 
+      window.alert('Błąd przy zapisywaniu zadania');
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -110,6 +139,7 @@ const Tasks: React.FC = () => {
               <MenuItem value="done">Gotowe</MenuItem>
             </Select>
           </FormControl>
+          <TextField fullWidth label="Notatki" multiline rows={2} value={formData.notes || ''} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} margin="normal" />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Anuluj</Button>

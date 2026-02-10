@@ -33,7 +33,7 @@ const CostEstimates: React.FC = () => {
     name: '',
     quantity: 1,
     unitPrice: 0,
-    category: ''
+    notes: ''
   });
 
   const handleOpen = (item?: CostEstimateItem) => {
@@ -42,7 +42,7 @@ const CostEstimates: React.FC = () => {
       setFormData(item);
     } else {
       setEditingId(null);
-      setFormData({ name: '', quantity: 1, unitPrice: 0, category: '' });
+      setFormData({ name: '', quantity: 1, unitPrice: 0, notes: '' });
     }
     setOpen(true);
   };
@@ -69,7 +69,7 @@ const CostEstimates: React.FC = () => {
           quantity: formData.quantity || 1,
           unitPrice: formData.unitPrice || 0,
           total,
-          category: formData.category
+          notes: formData.notes
         });
       }
       handleClose();
@@ -124,14 +124,14 @@ const CostEstimates: React.FC = () => {
               <TableCell align="right" sx={{ color: '#e0e0e0' }}><strong>Ilość</strong></TableCell>
               <TableCell align="right" sx={{ color: '#e0e0e0' }}><strong>Cena jednostkowa</strong></TableCell>
               <TableCell align="right" sx={{ color: '#e0e0e0' }}><strong>Razem</strong></TableCell>
-              <TableCell sx={{ color: '#e0e0e0' }}><strong>Kategoria</strong></TableCell>
+              <TableCell sx={{ color: '#e0e0e0' }}><strong>Notatki</strong></TableCell>
               <TableCell align="center" sx={{ color: '#e0e0e0' }}><strong>Akcje</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {costEstimates.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                   <Typography color="textSecondary">Brak pozycji. Dodaj pierwszą pozycję!</Typography>
                 </TableCell>
               </TableRow>
@@ -142,7 +142,7 @@ const CostEstimates: React.FC = () => {
                   <TableCell align="right">{item.quantity}</TableCell>
                   <TableCell align="right">{item.unitPrice.toFixed(2)} zł</TableCell>
                   <TableCell align="right"><strong>{item.total.toFixed(2)} zł</strong></TableCell>
-                  <TableCell>{item.category && <Chip label={item.category} size="small" />}</TableCell>
+                  <TableCell>{item.notes || '-'}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" color="primary" onClick={() => handleOpen(item)}>
                       <EditIcon />
@@ -167,8 +167,8 @@ const CostEstimates: React.FC = () => {
             value={formData.quantity || 1} onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })} margin="normal" />
           <TextField fullWidth label="Cena jednostkowa (zł)" type="number" inputProps={{ min: 0, step: 0.01 }}
             value={formData.unitPrice || 0} onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })} margin="normal" />
-          <TextField fullWidth label="Kategoria" value={formData.category || ''}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })} margin="normal" />
+          <TextField fullWidth label="Notatki" multiline rows={2} value={formData.notes || ''}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })} margin="normal" />
           {formData.quantity && formData.unitPrice && (
             <Typography sx={{ mt: 2, p: 1, bgcolor: '#f0f0f0', borderRadius: 1 }}>
               <strong>Razem: {((formData.quantity || 0) * (formData.unitPrice || 0)).toFixed(2)} zł</strong>

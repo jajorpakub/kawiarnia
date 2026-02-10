@@ -11,6 +11,10 @@ import Equipment from './pages/Equipment';
 import Tasks from './pages/Tasks';
 import Financing from './pages/Financing';
 import Calendar from './pages/Calendar';
+import Whiteboard from './pages/Whiteboard';
+import Locations from './pages/Locations';
+import Menu from './pages/Menu';
+import Procurement from './pages/Procurement';
 import { FirebaseProvider } from './context/FirebaseContext';
 
 const theme = createTheme({
@@ -43,12 +47,16 @@ function App() {
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
+                <Route path="/lokale" element={<Locations />} />
+                <Route path="/menu" element={<Menu />} />
+                <Route path="/procurement" element={<Procurement />} />
                 <Route path="/kosztorysy" element={<CostEstimates />} />
                 <Route path="/dostawcy" element={<Suppliers />} />
                 <Route path="/wyposazenie" element={<Equipment />} />
                 <Route path="/zadania" element={<Tasks />} />
                 <Route path="/finansowanie" element={<Financing />} />
                 <Route path="/kalendarz" element={<Calendar />} />
+                <Route path="/tablica" element={<Whiteboard />} />
               </Routes>
             </Box>
           </Box>

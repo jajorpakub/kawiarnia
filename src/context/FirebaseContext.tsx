@@ -9,7 +9,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { CostEstimateItem, Supplier, Equipment, Task, Financing, CalendarEvent } from '../types';
+import { CostEstimateItem, Supplier, Equipment, Task, Financing, CalendarEvent, Location, MenuItem } from '../types';
 
 interface FirebaseContextType {
   costEstimates: CostEstimateItem[];
@@ -42,6 +42,16 @@ interface FirebaseContextType {
   updateEvent: (id: string, item: Partial<CalendarEvent>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
 
+  locations: Location[];
+  addLocation: (item: Omit<Location, 'id'>) => Promise<string>;
+  updateLocation: (id: string, item: Partial<Location>) => Promise<void>;
+  deleteLocation: (id: string) => Promise<void>;
+
+  menuItems: MenuItem[];
+  addMenuItem: (item: Omit<MenuItem, 'id'>) => Promise<string>;
+  updateMenuItem: (id: string, item: Partial<MenuItem>) => Promise<void>;
+  deleteMenuItem: (id: string) => Promise<void>;
+
   loading: boolean;
 }
 
@@ -54,6 +64,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [tasks, setTasks] = useState<Task[]>([]);
   const [financing, setFinancing] = useState<Financing[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -104,6 +116,22 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           ...doc.data()
         } as CalendarEvent));
         setEvents(data);
+      }),
+
+      onSnapshot(collection(db, 'locations'), (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        } as Location));
+        setLocations(data);
+      }),
+
+      onSnapshot(collection(db, 'menuItems'), (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        } as MenuItem));
+        setMenuItems(data);
       })
     ];
 
@@ -175,19 +203,28 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const addTask = async (task: Omit<Task, 'id'>) => {
-    const docRef = await addDoc(collection(db, 'tasks'), {
-      ...task,
+    const taskData = {
+      title: task.title,
+      description: task.description || '',
+      assignedTo: task.assignedTo || '',
+      status: task.status || 'todo',
+      priority: task.priority || 'medium',
+      notes: task.notes || '',
+      dueDate: task.dueDate ? Timestamp.fromDate(new Date(task.dueDate)) : null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
-    });
+    };
+    const docRef = await addDoc(collection(db, 'tasks'), taskData);
     return docRef.id;
   };
 
   const updateTask = async (id: string, task: Partial<Task>) => {
-    await updateDoc(doc(db, 'tasks', id), {
-      ...task,
-      updatedAt: Timestamp.now()
-    });
+    const updateData: any = { ...task };
+    if (task.dueDate) {
+      updateData.dueDate = Timestamp.fromDate(new Date(task.dueDate));
+    }
+    updateData.updatedAt = Timestamp.now();
+    await updateDoc(doc(db, 'tasks', id), updateData);
   };
 
   const deleteTask = async (id: string) => {
@@ -234,6 +271,46 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     await deleteDoc(doc(db, 'events', id));
   };
 
+  const addLocation = async (item: Omit<Location, 'id'>) => {
+    const docRef = await addDoc(collection(db, 'locations'), {
+      ...item,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    });
+    return docRef.id;
+  };
+
+  const updateLocation = async (id: string, item: Partial<Location>) => {
+    await updateDoc(doc(db, 'locations', id), {
+      ...item,
+      updatedAt: Timestamp.now()
+    });
+  };
+
+  const deleteLocation = async (id: string) => {
+    await deleteDoc(doc(db, 'locations', id));
+  };
+
+  const addMenuItem = async (item: Omit<MenuItem, 'id'>) => {
+    const docRef = await addDoc(collection(db, 'menuItems'), {
+      ...item,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    });
+    return docRef.id;
+  };
+
+  const updateMenuItem = async (id: string, item: Partial<MenuItem>) => {
+    await updateDoc(doc(db, 'menuItems', id), {
+      ...item,
+      updatedAt: Timestamp.now()
+    });
+  };
+
+  const deleteMenuItem = async (id: string) => {
+    await deleteDoc(doc(db, 'menuItems', id));
+  };
+
   const value: FirebaseContextType = {
     costEstimates,
     addCostEstimate,
@@ -259,6 +336,14 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     addEvent,
     updateEvent,
     deleteEvent,
+    locations,
+    addLocation,
+    updateLocation,
+    deleteLocation,
+    menuItems,
+    addMenuItem,
+    updateMenuItem,
+    deleteMenuItem,
     loading
   };
 

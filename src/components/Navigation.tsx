@@ -19,19 +19,23 @@ import {
   Assignment as AssignmentIcon,
   Coffee as CoffeeIcon,
   AccountBalance as AccountBalanceIcon,
-  Event as EventIcon
+  Event as EventIcon,
+  BorderColor as BorderColorIcon,
+  LocationOn as LocationIcon,
+  RestaurantMenu as MenuIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
 const menuItems = [
   { text: 'Panel główny', icon: <DashboardIcon />, path: '/' },
-  { text: 'Kosztorysy', icon: <CalculateIcon />, path: '/kosztorysy' },
-  { text: 'Dostawcy', icon: <PeopleIcon />, path: '/dostawcy' },
-  { text: 'Wyposażenie', icon: <KitchenIcon />, path: '/wyposazenie' },
+  { text: 'Lokale', icon: <LocationIcon />, path: '/lokale' },
+  { text: 'Menu', icon: <MenuIcon />, path: '/menu' },
+  { text: 'Procurement', icon: <CalculateIcon />, path: '/procurement' },
   { text: 'Zadania', icon: <AssignmentIcon />, path: '/zadania' },
   { text: 'Kredyty/Dofinansowanie', icon: <AccountBalanceIcon />, path: '/finansowanie' },
   { text: 'Kalendarz', icon: <EventIcon />, path: '/kalendarz' },
+  { text: 'Tablica', icon: <BorderColorIcon />, path: '/tablica' },
 ];
 
 const Navigation: React.FC = () => {

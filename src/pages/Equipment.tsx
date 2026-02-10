@@ -9,12 +9,12 @@ const EquipmentPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Equipment>>({
-    name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending'
+    name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending', notes: ''
   });
 
   const handleOpen = (item?: Equipment) => {
     if (item) { setEditingId(item.id); setFormData(item); }
-    else { setEditingId(null); setFormData({ name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending' }); }
+    else { setEditingId(null); setFormData({ name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending', notes: '' }); }
     setOpen(true);
   };
 
@@ -24,7 +24,7 @@ const EquipmentPage: React.FC = () => {
     if (!formData.name || formData.quantity! <= 0) { alert('Proszę wypełnić wszystkie pola'); return; }
     try {
       if (editingId) { await updateEquipment(editingId, formData); }
-      else { await addEquipment({ name: formData.name!, quantity: formData.quantity || 1, unitPrice: formData.unitPrice || 0, supplier: formData.supplier, status: formData.status || 'pending' }); }
+      else { await addEquipment({ name: formData.name!, quantity: formData.quantity || 1, unitPrice: formData.unitPrice || 0, supplier: formData.supplier, status: formData.status || 'pending', notes: formData.notes }); }
       handleClose();
     } catch (error) { console.error('Error:', error); }
   };
@@ -66,12 +66,13 @@ const EquipmentPage: React.FC = () => {
               <TableCell align="right" sx={{ color: '#e0e0e0' }}><strong>Razem</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Dostawca</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Status</strong></TableCell>
+              <TableCell sx={{ color: '#e0e0e0' }}><strong>Notatki</strong></TableCell>
               <TableCell align="center" sx={{ color: '#e0e0e0' }}><strong>Akcje</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {equipment.length === 0 ? (
-              <TableRow><TableCell colSpan={7} align="center" sx={{ py: 4 }}><Typography color="textSecondary">Brak urządzeń</Typography></TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} align="center" sx={{ py: 4 }}><Typography color="textSecondary">Brak urządzeń</Typography></TableCell></TableRow>
             ) : (
               equipment.map((item) => (
                 <TableRow key={item.id} hover sx={{ '&:hover': { bgcolor: '#2a2a2a' } }}>
@@ -81,6 +82,7 @@ const EquipmentPage: React.FC = () => {
                   <TableCell align="right"><strong>{(item.unitPrice * item.quantity).toFixed(2)} zł</strong></TableCell>
                   <TableCell>{item.supplier || '-'}</TableCell>
                   <TableCell><Chip label={item.status} color={getStatusColor(item.status) as any} size="small" /></TableCell>
+                  <TableCell>{item.notes || '-'}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" color="primary" onClick={() => handleOpen(item)}><EditIcon /></IconButton>
                     <IconButton size="small" color="error" onClick={() => handleDelete(item.id)}><DeleteIcon /></IconButton>
@@ -107,6 +109,7 @@ const EquipmentPage: React.FC = () => {
               <MenuItem value="received">Otrzymane</MenuItem>
             </Select>
           </FormControl>
+          <TextField fullWidth label="Notatki" multiline rows={2} value={formData.notes || ''} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} margin="normal" />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Anuluj</Button>

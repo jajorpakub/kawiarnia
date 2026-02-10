@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { 
-  Card, CardContent, CardHeader, Typography, Box, LinearProgress, 
+  Card, CardContent, CardHeader, Typography, Box, 
   Collapse, IconButton, Table, TableBody, TableCell, TableHead, TableRow,
-  Chip, TableContainer, Paper
+  Chip, TableContainer, Paper, Grid
 } from '@mui/material';
-import { TrendingUp, AttachMoney, ShoppingCart, AssignmentTurnedIn, ExpandMore, AccountBalance, Event as EventIcon } from '@mui/icons-material';
+import { TrendingUp, AttachMoney, ShoppingCart, AssignmentTurnedIn, ExpandMore, AccountBalance, Event as EventIcon, LocationOn, RestaurantMenu } from '@mui/icons-material';
 import { useFirebase } from '../context/FirebaseContext';
 
 const Dashboard: React.FC = () => {
-  const { costEstimates, equipment, tasks, suppliers, financing, events } = useFirebase();
+  const { costEstimates, equipment, tasks, suppliers, financing, events, locations, menuItems } = useFirebase();
   const [expandedCards, setExpandedCards] = useState<{ [key: string]: boolean }>({});
 
   const totalBudget = costEstimates.reduce((sum, item) => sum + item.total, 0);
@@ -54,6 +54,62 @@ const Dashboard: React.FC = () => {
     return labels[status || 'default'] || status || 'Brak statusu';
   };
 
+  const StatCard = ({ icon, title, value, color, expanded, onToggle, expandContent }: any) => (
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: `linear-gradient(135deg, ${color}15 0%, ${color}08 100%)`,
+        border: `1px solid ${color}30`,
+        transition: 'all 0.3s ease',
+        cursor: 'pointer',
+        '&:hover': {
+          boxShadow: `0 8px 24px ${color}20`,
+          transform: 'translateY(-2px)',
+          border: `1px solid ${color}50`
+        }
+      }}
+    >
+      <CardHeader
+        avatar={<Box sx={{ color, fontSize: 28 }}>{icon}</Box>}
+        title={<Typography sx={{ fontSize: '0.95rem', fontWeight: 500, color: '#e0e0e0' }}>{title}</Typography>}
+        action={
+          <IconButton
+            onClick={() => onToggle()}
+            size="small"
+            sx={{
+              color,
+              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.3s'
+            }}
+          >
+            <ExpandMore />
+          </IconButton>
+        }
+        sx={{ pb: 0 }}
+      />
+      <CardContent sx={{ flexGrow: 1, pt: 1 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color,
+            fontWeight: 700,
+            fontSize: '2rem',
+            mb: 0
+          }}
+        >
+          {value}
+        </Typography>
+      </CardContent>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent sx={{ pt: 2, borderTop: `1px solid ${color}20` }}>
+          {expandContent}
+        </CardContent>
+      </Collapse>
+    </Card>
+  );
+
   const stats = [
     {
       key: 'budget',
@@ -61,25 +117,24 @@ const Dashboard: React.FC = () => {
       value: `${totalBudget.toFixed(2)} zł`,
       icon: <AttachMoney />,
       color: '#4CAF50',
-      progress: 65,
       expandContent: (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Nazwa</TableCell>
-                <TableCell align="right">Ilość</TableCell>
-                <TableCell align="right">Cena</TableCell>
-                <TableCell align="right">Razem</TableCell>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Cena</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Razem</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {costEstimates.slice(0, 5).map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell align="right">{item.quantity}</TableCell>
-                  <TableCell align="right">{item.unitPrice.toFixed(2)} zł</TableCell>
-                  <TableCell align="right">{item.total.toFixed(2)} zł</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.unitPrice.toFixed(2)} zł</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.total.toFixed(2)} zł</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -90,25 +145,24 @@ const Dashboard: React.FC = () => {
     {
       key: 'equipment',
       title: 'Wyposażenie',
-      value: `${equipmentValue.toFixed(2)} zł`,
+      value: `${equipment.length}`,
       icon: <ShoppingCart />,
       color: '#2196F3',
-      progress: Math.min((equipmentValue / totalBudget * 100) || 0, 100),
       expandContent: (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Nazwa</TableCell>
-                <TableCell align="right">Ilość</TableCell>
-                <TableCell align="right">Status</TableCell>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {equipment.slice(0, 5).map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell align="right">{item.quantity}</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
                   <TableCell align="right">
                     <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} />
                   </TableCell>
@@ -121,24 +175,23 @@ const Dashboard: React.FC = () => {
     },
     {
       key: 'tasks',
-      title: 'Wykonane zadania',
+      title: 'Zadania',
       value: `${completedTasks}/${totalTasks}`,
       icon: <AssignmentTurnedIn />,
       color: '#FF9800',
-      progress: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
       expandContent: (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Zadanie</TableCell>
-                <TableCell align="right">Status</TableCell>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Zadanie</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {tasks.slice(0, 5).map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell>{task.title}</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{task.title}</TableCell>
                   <TableCell align="right">
                     <Chip label={getStatusLabel(task.status)} size="small" color={getStatusColor(task.status)} />
                   </TableCell>
@@ -151,25 +204,24 @@ const Dashboard: React.FC = () => {
     },
     {
       key: 'suppliers',
-      title: 'Liczba dostawców',
+      title: 'Dostawcy',
       value: `${suppliers.length}`,
       icon: <TrendingUp />,
       color: '#9C27B0',
-      progress: Math.min(suppliers.length * 10, 100),
       expandContent: (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Nazwa</TableCell>
-                <TableCell align="right">Kontakt</TableCell>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Kontakt</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {suppliers.slice(0, 5).map((supplier) => (
                 <TableRow key={supplier.id}>
-                  <TableCell>{supplier.name}</TableCell>
-                  <TableCell align="right">{supplier.phone}</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.name}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{supplier.phone}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -183,22 +235,21 @@ const Dashboard: React.FC = () => {
       value: `${approvedFinancing.toFixed(2)} zł`,
       icon: <AccountBalance />,
       color: '#00897B',
-      progress: totalFinancing > 0 ? (approvedFinancing / totalFinancing * 100) : 0,
       expandContent: (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Nazwa</TableCell>
-                <TableCell align="right">Kwota (zł)</TableCell>
-                <TableCell align="right">Status</TableCell>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Kwota (zł)</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {financing.slice(0, 5).map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell align="right">{item.amount.toFixed(2)}</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.amount.toFixed(2)}</TableCell>
                   <TableCell align="right">
                     <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} />
                   </TableCell>
@@ -211,18 +262,17 @@ const Dashboard: React.FC = () => {
     },
     {
       key: 'calendar',
-      title: 'Nadchodzące zdarzenia',
+      title: 'Zdarzenia',
       value: `${upcomingEvents}`,
       icon: <EventIcon />,
       color: '#FF6B6B',
-      progress: Math.min(upcomingEvents * 10, 100),
       expandContent: (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell>Tytuł</TableCell>
-                <TableCell align="right">Data</TableCell>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Tytuł</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Data</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -232,8 +282,8 @@ const Dashboard: React.FC = () => {
                 .slice(0, 5)
                 .map((event) => (
                   <TableRow key={event.id}>
-                    <TableCell>{event.title}</TableCell>
-                    <TableCell align="right">
+                    <TableCell sx={{ color: '#e0e0e0' }}>{event.title}</TableCell>
+                    <TableCell align="right" sx={{ color: '#e0e0e0' }}>
                       {new Date(event.startDate).toLocaleDateString('pl-PL')}
                     </TableCell>
                   </TableRow>
@@ -242,64 +292,103 @@ const Dashboard: React.FC = () => {
           </Table>
         </TableContainer>
       )
+    },
+    {
+      key: 'locations',
+      title: 'Lokale',
+      value: `${locations.length}`,
+      icon: <LocationOn />,
+      color: '#FF5722',
+      expandContent: (
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Ulica</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Metraż (m²)</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {locations.slice(0, 5).map((location) => (
+                <TableRow key={location.id}>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{location.street}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{location.squareMeters}</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>
+                    <Chip label={location.status === 'interested' ? 'Zainteresowane' : location.status === 'negotiating' ? 'Negocjacje' : location.status === 'viewing' ? 'Oglądane' : 'Odrzucone'} size="small" color={location.status === 'interested' || location.status === 'negotiating' ? 'success' : 'default'} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )
+    },
+    {
+      key: 'menu',
+      title: 'Menu',
+      value: `${menuItems.length}`,
+      icon: <RestaurantMenu />,
+      color: '#E91E63',
+      expandContent: (
+        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
+          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
+                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Kategoria</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Typ</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {menuItems.slice(0, 5).map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>
+                    {item.category === 'beverage' ? 'Napoje' : 
+                     item.category === 'dessert' ? 'Desery' : 
+                     item.category === 'snack' ? 'Przekąski' : 
+                     item.category === 'main' ? 'Dania główne' :
+                     item.category === 'breakfast' ? 'Śniadania' : 'Inne'}
+                  </TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>
+                    {item.dietary === 'vegan' ? '🌱 Vegan' : item.dietary === 'vegetarian' ? '🥗 Wegetariańskie' : 'Brak'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )
     }
   ];
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Panel główny - Przygotowania do otwarcia kawiarni
-      </Typography>
-      
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' }, gap: 3 }}>
-        {stats.map((stat) => (
-          <Box key={stat.key}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardHeader
-                avatar={<Box sx={{ color: stat.color }}>{stat.icon}</Box>}
-                title={stat.title}
-                action={
-                  <IconButton 
-                    onClick={() => toggleExpand(stat.key)}
-                    sx={{ transform: expandedCards[stat.key] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
-                  >
-                    <ExpandMore />
-                  </IconButton>
-                }
-                sx={{ pb: 1 }}
-              />
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h4" gutterBottom>
-                  {stat.value}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ width: '100%', mr: 1 }}>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={stat.progress}
-                      sx={{
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: stat.color,
-                        }
-                      }}
-                    />
-                  </Box>
-                  <Box sx={{ minWidth: 35 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${Math.round(stat.progress)}%`}
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-              <Collapse in={expandedCards[stat.key]} timeout="auto" unmountOnExit>
-                <CardContent sx={{ pt: 0, borderTop: '1px solid #eee' }}>
-                  {stat.expandContent}
-                </CardContent>
-              </Collapse>
-            </Card>
-          </Box>
-        ))}
+    <Box sx={{ p: 4, maxWidth: '1600px', mx: 'auto' }}>
+      <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: '#e0e0e0' }}>
+          Panel główny
+        </Typography>
+        <Typography variant="body1" sx={{ color: '#b0b0b0' }}>
+          Przygotowania do otwarcia kawiarni
+        </Typography>
       </Box>
+
+      <Grid container spacing={3}>
+        {stats.map((stat) => (
+          <Grid item xs={12} sm={6} md={4} key={stat.key}>
+            <StatCard
+              icon={stat.icon}
+              title={stat.title}
+              value={stat.value}
+              color={stat.color}
+              expanded={expandedCards[stat.key]}
+              onToggle={() => toggleExpand(stat.key)}
+              expandContent={stat.expandContent}
+            />
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 };

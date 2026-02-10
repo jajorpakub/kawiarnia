@@ -9,7 +9,7 @@ const Suppliers: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Supplier>>({
-    name: '', contact: '', email: '', phone: '', category: '', notes: ''
+    name: '', contact: '', email: '', phone: '', notes: ''
   });
 
   const handleOpen = (supplier?: Supplier) => {
@@ -18,7 +18,7 @@ const Suppliers: React.FC = () => {
       setFormData(supplier);
     } else {
       setEditingId(null);
-      setFormData({ name: '', contact: '', email: '', phone: '', category: '', notes: '' });
+      setFormData({ name: '', contact: '', email: '', phone: '', notes: '' });
     }
     setOpen(true);
   };
@@ -36,7 +36,7 @@ const Suppliers: React.FC = () => {
       } else {
         await addSupplier({
           name: formData.name!, contact: formData.contact!, email: formData.email || '',
-          phone: formData.phone || '', category: formData.category, notes: formData.notes
+          phone: formData.phone || '', notes: formData.notes
         });
       }
       handleClose();
@@ -74,13 +74,13 @@ const Suppliers: React.FC = () => {
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Osoba kontaktowa</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Email</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Telefon</strong></TableCell>
-              <TableCell sx={{ color: '#e0e0e0' }}><strong>Kategoria</strong></TableCell>
+              <TableCell sx={{ color: '#e0e0e0' }}><strong>Notatki</strong></TableCell>
               <TableCell align="center" sx={{ color: '#e0e0e0' }}><strong>Akcje</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {suppliers.length === 0 ? (
-              <TableRow><TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+              <TableRow><TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                 <Typography color="textSecondary">Brak dostawców</Typography>
               </TableCell></TableRow>
             ) : (
@@ -90,7 +90,7 @@ const Suppliers: React.FC = () => {
                   <TableCell>{supplier.contact}</TableCell>
                   <TableCell>{supplier.email && <a href={`mailto:${supplier.email}`}>{supplier.email}</a>}</TableCell>
                   <TableCell>{supplier.phone && <a href={`tel:${supplier.phone}`}>{supplier.phone}</a>}</TableCell>
-                  <TableCell>{supplier.category}</TableCell>
+                  <TableCell>{supplier.notes || '-'}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" color="primary" onClick={() => handleOpen(supplier)}><EditIcon /></IconButton>
                     <IconButton size="small" color="error" onClick={() => handleDelete(supplier.id)}><DeleteIcon /></IconButton>
@@ -109,7 +109,6 @@ const Suppliers: React.FC = () => {
           <TextField fullWidth label="Osoba kontaktowa" value={formData.contact || ''} onChange={(e) => setFormData({ ...formData, contact: e.target.value })} margin="normal" />
           <TextField fullWidth label="Email" type="email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} margin="normal" />
           <TextField fullWidth label="Telefon" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} margin="normal" />
-          <TextField fullWidth label="Kategoria" value={formData.category || ''} onChange={(e) => setFormData({ ...formData, category: e.target.value })} margin="normal" />
           <TextField fullWidth label="Notatki" multiline rows={3} value={formData.notes || ''} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} margin="normal" />
         </DialogContent>
         <DialogActions>
