@@ -1,0 +1,61 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Navigation from './components/Navigation';
+import Dashboard from './pages/Dashboard';
+import CostEstimates from './pages/CostEstimates';
+import Suppliers from './pages/Suppliers';
+import Equipment from './pages/Equipment';
+import Tasks from './pages/Tasks';
+import Financing from './pages/Financing';
+import Calendar from './pages/Calendar';
+import { FirebaseProvider } from './context/FirebaseContext';
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#121212',
+      paper: '#1e1e1e',
+    },
+    primary: { main: '#8B4513' },
+    secondary: { main: '#D2691E' },
+    text: {
+      primary: '#e0e0e0',
+      secondary: '#b0b0b0',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
+
+function App() {
+  return (
+    <FirebaseProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <Box sx={{ display: 'flex' }}>
+            <Navigation />
+            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/kosztorysy" element={<CostEstimates />} />
+                <Route path="/dostawcy" element={<Suppliers />} />
+                <Route path="/wyposazenie" element={<Equipment />} />
+                <Route path="/zadania" element={<Tasks />} />
+                <Route path="/finansowanie" element={<Financing />} />
+                <Route path="/kalendarz" element={<Calendar />} />
+              </Routes>
+            </Box>
+          </Box>
+        </Router>
+      </ThemeProvider>
+    </FirebaseProvider>
+  );
+}
+
+export default App;
