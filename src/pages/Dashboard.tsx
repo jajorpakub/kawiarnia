@@ -13,10 +13,8 @@ const Dashboard: React.FC = () => {
   const [expandedCards, setExpandedCards] = useState<{ [key: string]: boolean }>({});
 
   const totalBudget = costEstimates.reduce((sum, item) => sum + item.total, 0);
-  const equipmentValue = equipment.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   const completedTasks = tasks.filter(t => t.status === 'done').length;
   const totalTasks = tasks.length;
-  const totalFinancing = financing.reduce((sum, item) => sum + item.amount, 0);
   const approvedFinancing = financing.reduce((sum, item) => sum + (item.approvedAmount || 0), 0);
   const upcomingEvents = events.filter(e => new Date(e.startDate) > new Date()).length;
 
