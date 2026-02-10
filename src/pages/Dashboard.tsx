@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, Typography, Box, 
   Collapse, IconButton, Table, TableBody, TableCell, TableHead, TableRow,
-  Chip, TableContainer, Paper, Grid
+  Chip, TableContainer, Paper
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { TrendingUp, AttachMoney, ShoppingCart, AssignmentTurnedIn, ExpandMore, AccountBalance, Event as EventIcon, LocationOn, RestaurantMenu } from '@mui/icons-material';
 import { useFirebase } from '../context/FirebaseContext';
 
@@ -374,9 +375,9 @@ const Dashboard: React.FC = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {stats.map((stat) => (
-          <Grid item xs={12} sm={6} md={4} key={stat.key}>
+<Grid container spacing={3}>
+  {stats.map((stat) => (
+    <Grid key={stat.key} size={{ xs: 12, sm: 6, md: 4 }}>
             <StatCard
               icon={stat.icon}
               title={stat.title}
