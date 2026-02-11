@@ -78,9 +78,9 @@ const Tasks: React.FC = () => {
 
       {tasks.length > 0 && (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2, mb: 3 }}>
-          <Card sx={{ bgcolor: '#fff3e0' }}><CardContent><Typography color="textSecondary">Do zrobienia</Typography><Typography variant="h5">{todoCount}</Typography></CardContent></Card>
-          <Card sx={{ bgcolor: '#fff9c4' }}><CardContent><Typography color="textSecondary">W trakcie</Typography><Typography variant="h5">{inProgressCount}</Typography></CardContent></Card>
-          <Card sx={{ bgcolor: '#e8f5e9' }}><CardContent><Typography color="textSecondary">Gotowe</Typography><Typography variant="h5">{doneCount}</Typography></CardContent></Card>
+          <Card sx={{ bgcolor: '#2a2a2a' }}><CardContent><Typography color="textSecondary">Do zrobienia</Typography><Typography variant="h5">{todoCount}</Typography></CardContent></Card>
+          <Card sx={{ bgcolor: '#2a2a2a' }}><CardContent><Typography color="textSecondary">W trakcie</Typography><Typography variant="h5">{inProgressCount}</Typography></CardContent></Card>
+          <Card sx={{ bgcolor: '#2a2a2a' }}><CardContent><Typography color="textSecondary">Gotowe</Typography><Typography variant="h5">{doneCount}</Typography></CardContent></Card>
         </Box>
       )}
 

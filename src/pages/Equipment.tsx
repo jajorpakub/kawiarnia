@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Card, CardContent, Typography, CircularProgress, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Card, CardContent, Typography, CircularProgress, Select, MenuItem, FormControl, InputLabel, Chip, Link } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { useFirebase } from '../context/FirebaseContext';
 import { Equipment } from '../types';
+import { OpenInNew } from '@mui/icons-material';
 
 const EquipmentPage: React.FC = () => {
   const { equipment, addEquipment, updateEquipment, deleteEquipment, loading } = useFirebase();
@@ -14,7 +15,7 @@ const EquipmentPage: React.FC = () => {
 
   const handleOpen = (item?: Equipment) => {
     if (item) { setEditingId(item.id); setFormData(item); }
-    else { setEditingId(null); setFormData({ name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending', notes: '' }); }
+    else { setEditingId(null); setFormData({ name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending', link: '', notes: '' }); }
     setOpen(true);
   };
 
@@ -24,7 +25,7 @@ const EquipmentPage: React.FC = () => {
     if (!formData.name || formData.quantity! <= 0) { alert('Proszę wypełnić wszystkie pola'); return; }
     try {
       if (editingId) { await updateEquipment(editingId, formData); }
-      else { await addEquipment({ name: formData.name!, quantity: formData.quantity || 1, unitPrice: formData.unitPrice || 0, supplier: formData.supplier, status: formData.status || 'pending', notes: formData.notes }); }
+      else { await addEquipment({ name: formData.name!, quantity: formData.quantity || 1, unitPrice: formData.unitPrice || 0, supplier: formData.supplier, status: formData.status || 'pending', link: formData.link || '', notes: formData.notes }); }
       handleClose();
     } catch (error) { console.error('Error:', error); }
   };
@@ -66,6 +67,7 @@ const EquipmentPage: React.FC = () => {
               <TableCell align="right" sx={{ color: '#e0e0e0' }}><strong>Razem</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Dostawca</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Status</strong></TableCell>
+              <TableCell sx={{ color: '#e0e0e0' }}><strong>Link</strong></TableCell>
               <TableCell sx={{ color: '#e0e0e0' }}><strong>Notatki</strong></TableCell>
               <TableCell align="center" sx={{ color: '#e0e0e0' }}><strong>Akcje</strong></TableCell>
             </TableRow>
@@ -82,6 +84,16 @@ const EquipmentPage: React.FC = () => {
                   <TableCell align="right"><strong>{(item.unitPrice * item.quantity).toFixed(2)} zł</strong></TableCell>
                   <TableCell>{item.supplier || '-'}</TableCell>
                   <TableCell><Chip label={item.status} color={getStatusColor(item.status) as any} size="small" /></TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>
+                  {item.link ? (
+                    <Link href={item.link} target="_blank" rel="noopener noreferrer" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8B4513' }}>
+                      Obejrzyj
+                      <OpenInNew sx={{ fontSize: 16 }} />
+                    </Link>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
                   <TableCell>{item.notes || '-'}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" color="primary" onClick={() => handleOpen(item)}><EditIcon /></IconButton>
@@ -109,6 +121,16 @@ const EquipmentPage: React.FC = () => {
               <MenuItem value="received">Otrzymane</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+  fullWidth
+  label="Link do produktu"
+  value={formData.link || ''}
+  onChange={(e) =>
+    setFormData({ ...formData, link: e.target.value })
+  }
+  margin="normal"
+/>
+
           <TextField fullWidth label="Notatki" multiline rows={2} value={formData.notes || ''} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} margin="normal" />
         </DialogContent>
         <DialogActions>

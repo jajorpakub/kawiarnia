@@ -5,6 +5,7 @@ export interface CostEstimateItem {
   unitPrice: number;
   total: number;
   notes?: string;
+  link?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -27,6 +28,7 @@ export interface Equipment {
   unitPrice: number;
   supplier?: string;
   status?: 'pending' | 'ordered' | 'received';
+  link?: string;
   notes?: string;
   createdAt?: Date;
   updatedAt?: Date;

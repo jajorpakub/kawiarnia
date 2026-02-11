@@ -19,9 +19,11 @@ import {
   Chip,
   Tabs,
   Tab,
-  Typography
+  Typography,
+  Link,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
+import OpenInNew from '@mui/icons-material/OpenInNew';
 import { useFirebase } from '../context/FirebaseContext';
 import { CostEstimateItem, Supplier, Equipment } from '../types';
 
@@ -60,6 +62,7 @@ export const Procurement: React.FC = () => {
     quantity: 1,
     unitPrice: 0,
     total: 0,
+    link: '',
     notes: ''
   });
 
@@ -78,6 +81,7 @@ export const Procurement: React.FC = () => {
     quantity: 1,
     unitPrice: 0,
     supplier: '',
+    link: '',
     status: 'pending',
     notes: ''
   });
@@ -89,7 +93,7 @@ export const Procurement: React.FC = () => {
       setCostFormData(item);
       setEditingId(item.id);
     } else if (type === 'costEstimate') {
-      setCostFormData({ name: '', quantity: 1, unitPrice: 0, total: 0, notes: '' });
+      setCostFormData({ name: '', quantity: 1, unitPrice: 0, total: 0, link: '', notes: '' });
       setEditingId(null);
     } else if (type === 'supplier' && item) {
       setSupplierFormData(item);
@@ -101,7 +105,7 @@ export const Procurement: React.FC = () => {
       setEquipmentFormData(item);
       setEditingId(item.id);
     } else {
-      setEquipmentFormData({ name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending', notes: '' });
+      setEquipmentFormData({ name: '', quantity: 1, unitPrice: 0, supplier: '', status: 'pending', link: '', notes: '' });
       setEditingId(null);
     }
     
@@ -205,6 +209,7 @@ export const Procurement: React.FC = () => {
                 <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
                 <TableCell align="right" sx={{ color: '#e0e0e0' }}>Cena jedn.</TableCell>
                 <TableCell align="right" sx={{ color: '#e0e0e0' }}>Razem</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Link</TableCell>
                 <TableCell sx={{ color: '#e0e0e0' }}>Notatki</TableCell>
                 <TableCell sx={{ color: '#e0e0e0' }} align="center">Akcje</TableCell>
               </TableRow>
@@ -216,6 +221,16 @@ export const Procurement: React.FC = () => {
                   <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
                   <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.unitPrice.toFixed(2)} zł</TableCell>
                   <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.total.toFixed(2)} zł</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>
+                  {item.link ? (
+                    <Link href={item.link} target="_blank" rel="noopener noreferrer" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8B4513' }}>
+                      Obejrzyj
+                      <OpenInNew sx={{ fontSize: 16 }} />
+                    </Link>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
                   <TableCell sx={{ color: '#e0e0e0' }}>{item.notes || '-'}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" onClick={() => handleOpenDialog('costEstimate', item)}>
@@ -289,6 +304,7 @@ export const Procurement: React.FC = () => {
                 <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
                 <TableCell sx={{ color: '#e0e0e0' }}>Dostawca</TableCell>
                 <TableCell sx={{ color: '#e0e0e0' }}>Status</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Link</TableCell>
                 <TableCell sx={{ color: '#e0e0e0' }}>Notatki</TableCell>
                 <TableCell sx={{ color: '#e0e0e0' }} align="center">Akcje</TableCell>
               </TableRow>
@@ -302,6 +318,16 @@ export const Procurement: React.FC = () => {
                   <TableCell sx={{ color: '#e0e0e0' }}>
                     <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} />
                   </TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>
+                  {item.link ? (
+                    <Link href={item.link} target="_blank" rel="noopener noreferrer" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8B4513' }}>
+                      Obejrzyj
+                      <OpenInNew sx={{ fontSize: 16 }} />
+                    </Link>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
                   <TableCell sx={{ color: '#e0e0e0' }}>{item.notes || '-'}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" onClick={() => handleOpenDialog('equipment', item)}>
@@ -346,6 +372,12 @@ export const Procurement: React.FC = () => {
                 type="number"
                 value={costFormData.unitPrice}
                 onChange={(e) => setCostFormData({ ...costFormData, unitPrice: parseFloat(e.target.value) })}
+                fullWidth
+              />
+              <TextField
+                label="Link do produktu"
+                value={costFormData.link || ''}
+                onChange={(e) => setCostFormData({ ...costFormData, link: e.target.value })}
                 fullWidth
               />
               <TextField
@@ -434,6 +466,12 @@ export const Procurement: React.FC = () => {
                 <MenuItem value="ordered">Zamówione</MenuItem>
                 <MenuItem value="received">Otrzymane</MenuItem>
               </TextField>
+              <TextField
+                label="Link do produktu"
+                value={equipmentFormData.link || ''}
+                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, link: e.target.value })}
+                fullWidth
+              />
               <TextField
                 label="Notatki"
                 value={equipmentFormData.notes || ''}
