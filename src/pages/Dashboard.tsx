@@ -53,6 +53,63 @@ const Dashboard: React.FC = () => {
     return labels[status || 'default'] || status || 'Brak statusu';
   };
 
+  const CompactTable = ({ color, children }: any) => (
+    <TableContainer component={Paper} sx={{ 
+      bgcolor: 'transparent', 
+      boxShadow: 'none',
+      overflow: 'visible'
+    }}>
+      <Table size="small" sx={{ 
+        width: '100%',
+        '& .MuiTableCell-root': {
+          padding: '5px 6px',
+          fontSize: '0.7rem',
+          height: '28px'
+        }
+      }}>
+        {children}
+      </Table>
+    </TableContainer>
+  );
+
+  const StyledTableHead = ({ color, children }: any) => (
+    <TableHead>
+      <TableRow sx={{ 
+        backgroundColor: `${color}15`, 
+        borderBottom: `2px solid ${color}30`,
+        height: '28px'
+      }}>
+        {children}
+      </TableRow>
+    </TableHead>
+  );
+
+  const StyledHeaderCell = ({ color, children }: any) => (
+    <TableCell sx={{ 
+      color, 
+      fontWeight: 600, 
+      fontSize: '0.65rem', 
+      textTransform: 'uppercase', 
+      letterSpacing: '0.3px',
+      padding: '5px 6px',
+      height: '28px'
+    }}>
+      {children}
+    </TableCell>
+  );
+
+  const StyledDataCell = ({ color, align, weight, children }: any) => (
+    <TableCell align={align} sx={{ 
+      color: color || '#e0e0e0', 
+      fontWeight: weight || 400,
+      padding: '5px 6px',
+      fontSize: '0.7rem',
+      height: '28px'
+    }}>
+      {children}
+    </TableCell>
+  );
+
   const StatCard = ({ icon, title, value, color, expanded, onToggle, expandContent }: any) => (
     <Card
       sx={{
@@ -86,9 +143,9 @@ const Dashboard: React.FC = () => {
             <ExpandMore />
           </IconButton>
         }
-        sx={{ pb: 0 }}
+        sx={{ pb: 0.5, pt: 1 }}
       />
-      <CardContent sx={{ flexGrow: 1, pt: 1 }}>
+      <CardContent sx={{ flexGrow: 1, pt: 0.5, pb: 0 }}>
         <Typography
           variant="h4"
           sx={{
@@ -102,7 +159,7 @@ const Dashboard: React.FC = () => {
         </Typography>
       </CardContent>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent sx={{ pt: 2, borderTop: `1px solid ${color}20` }}>
+        <CardContent sx={{ pt: 1, pb: 1, borderTop: `1px solid ${color}20` }}>
           {expandContent}
         </CardContent>
       </Collapse>
@@ -117,28 +174,30 @@ const Dashboard: React.FC = () => {
       icon: <AttachMoney />,
       color: '#4CAF50',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Cena</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Razem</TableCell>
+        <CompactTable color="#4CAF50">
+          <StyledTableHead color="#4CAF50">
+            <StyledHeaderCell color="#4CAF50">Nazwa</StyledHeaderCell>
+            <StyledHeaderCell color="#4CAF50">Ilość</StyledHeaderCell>
+            <StyledHeaderCell color="#4CAF50">Cena</StyledHeaderCell>
+            <StyledHeaderCell color="#4CAF50">Razem</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {costEstimates.slice(0, 5).map((item, idx) => (
+              <TableRow key={item.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#4CAF5012' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{item.name}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0" align="right">{item.quantity}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0" align="right">{item.unitPrice.toFixed(2)} zł</StyledDataCell>
+                <StyledDataCell color="#4CAF50" weight={600} align="right">{item.total.toFixed(2)} zł</StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {costEstimates.slice(0, 5).map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.unitPrice.toFixed(2)} zł</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.total.toFixed(2)} zł</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -148,28 +207,30 @@ const Dashboard: React.FC = () => {
       icon: <ShoppingCart />,
       color: '#2196F3',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Status</TableCell>
+        <CompactTable color="#2196F3">
+          <StyledTableHead color="#2196F3">
+            <StyledHeaderCell color="#2196F3">Nazwa</StyledHeaderCell>
+            <StyledHeaderCell color="#2196F3">Ilość</StyledHeaderCell>
+            <StyledHeaderCell color="#2196F3">Status</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {equipment.slice(0, 5).map((item, idx) => (
+              <TableRow key={item.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#2196F312' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{item.name}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0" align="right">{item.quantity}</StyledDataCell>
+                <StyledDataCell align="right" sx={{ padding: '4px 6px' }}>
+                  <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} sx={{ height: '18px', fontSize: '0.6rem' }} />
+                </StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {equipment.slice(0, 5).map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
-                  <TableCell align="right">
-                    <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -179,26 +240,28 @@ const Dashboard: React.FC = () => {
       icon: <AssignmentTurnedIn />,
       color: '#FF9800',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Zadanie</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Status</TableCell>
+        <CompactTable color="#FF9800">
+          <StyledTableHead color="#FF9800">
+            <StyledHeaderCell color="#FF9800">Zadanie</StyledHeaderCell>
+            <StyledHeaderCell color="#FF9800">Status</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {tasks.slice(0, 5).map((task, idx) => (
+              <TableRow key={task.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#FF980012' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{task.title}</StyledDataCell>
+                <StyledDataCell align="right" sx={{ padding: '4px 6px' }}>
+                  <Chip label={getStatusLabel(task.status)} size="small" color={getStatusColor(task.status)} sx={{ height: '18px', fontSize: '0.6rem' }} />
+                </StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {tasks.slice(0, 5).map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{task.title}</TableCell>
-                  <TableCell align="right">
-                    <Chip label={getStatusLabel(task.status)} size="small" color={getStatusColor(task.status)} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -208,24 +271,26 @@ const Dashboard: React.FC = () => {
       icon: <TrendingUp />,
       color: '#9C27B0',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Kontakt</TableCell>
+        <CompactTable color="#9C27B0">
+          <StyledTableHead color="#9C27B0">
+            <StyledHeaderCell color="#9C27B0">Nazwa</StyledHeaderCell>
+            <StyledHeaderCell color="#9C27B0">Kontakt</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {suppliers.slice(0, 5).map((supplier, idx) => (
+              <TableRow key={supplier.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#9C27B012' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{supplier.name}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0" align="right">{supplier.phone}</StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {suppliers.slice(0, 5).map((supplier) => (
-                <TableRow key={supplier.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.name}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{supplier.phone}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -235,28 +300,30 @@ const Dashboard: React.FC = () => {
       icon: <AccountBalance />,
       color: '#00897B',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Kwota (zł)</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Status</TableCell>
+        <CompactTable color="#00897B">
+          <StyledTableHead color="#00897B">
+            <StyledHeaderCell color="#00897B">Nazwa</StyledHeaderCell>
+            <StyledHeaderCell color="#00897B">Kwota (zł)</StyledHeaderCell>
+            <StyledHeaderCell color="#00897B">Status</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {financing.slice(0, 5).map((item, idx) => (
+              <TableRow key={item.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#00897B12' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{item.name}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0" align="right">{item.amount.toFixed(2)}</StyledDataCell>
+                <StyledDataCell align="right" sx={{ padding: '4px 6px' }}>
+                  <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} sx={{ height: '18px', fontSize: '0.6rem' }} />
+                </StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {financing.slice(0, 5).map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.amount.toFixed(2)}</TableCell>
-                  <TableCell align="right">
-                    <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -266,30 +333,32 @@ const Dashboard: React.FC = () => {
       icon: <EventIcon />,
       color: '#FF6B6B',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Tytuł</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Data</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {events
-                .filter(e => new Date(e.startDate) > new Date())
-                .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-                .slice(0, 5)
-                .map((event) => (
-                  <TableRow key={event.id}>
-                    <TableCell sx={{ color: '#e0e0e0' }}>{event.title}</TableCell>
-                    <TableCell align="right" sx={{ color: '#e0e0e0' }}>
-                      {new Date(event.startDate).toLocaleDateString('pl-PL')}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <CompactTable color="#FF6B6B">
+          <StyledTableHead color="#FF6B6B">
+            <StyledHeaderCell color="#FF6B6B">Tytuł</StyledHeaderCell>
+            <StyledHeaderCell color="#FF6B6B">Data</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {events
+              .filter(e => new Date(e.startDate) > new Date())
+              .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+              .slice(0, 5)
+              .map((event, idx) => (
+                <TableRow key={event.id} sx={{ 
+                  backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                  borderBottom: '1px solid #ffffff10',
+                  transition: 'all 0.2s ease',
+                  '&:hover': { backgroundColor: '#FF6B6B12' },
+                  height: '28px'
+                }}>
+                  <StyledDataCell color="#e0e0e0" weight={500}>{event.title}</StyledDataCell>
+                  <StyledDataCell color="#b0b0b0" align="right">
+                    {new Date(event.startDate).toLocaleDateString('pl-PL')}
+                  </StyledDataCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -299,28 +368,35 @@ const Dashboard: React.FC = () => {
       icon: <LocationOn />,
       color: '#FF5722',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Ulica</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Metraż (m²)</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Status</TableCell>
+        <CompactTable color="#FF5722">
+          <StyledTableHead color="#FF5722">
+            <StyledHeaderCell color="#FF5722">Ulica</StyledHeaderCell>
+            <StyledHeaderCell color="#FF5722">m²</StyledHeaderCell>
+            <StyledHeaderCell color="#FF5722">Status</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {locations.slice(0, 5).map((location, idx) => (
+              <TableRow key={location.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#FF572212' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{location.street}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0" align="right">{location.squareMeters}</StyledDataCell>
+                <StyledDataCell align="right" sx={{ padding: '4px 6px' }}>
+                  <Chip 
+                    label={location.status === 'interested' ? 'Zaint.' : location.status === 'negotiating' ? 'Negoj.' : location.status === 'viewing' ? 'Ogląd.' : 'Odrz.'} 
+                    size="small" 
+                    color={location.status === 'interested' || location.status === 'negotiating' ? 'success' : 'default'} 
+                    sx={{ height: '18px', fontSize: '0.6rem' }}
+                  />
+                </StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {locations.slice(0, 5).map((location) => (
-                <TableRow key={location.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{location.street}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{location.squareMeters}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>
-                    <Chip label={location.status === 'interested' ? 'Zainteresowane' : location.status === 'negotiating' ? 'Negocjacje' : location.status === 'viewing' ? 'Oglądane' : 'Odrzucone'} size="small" color={location.status === 'interested' || location.status === 'negotiating' ? 'success' : 'default'} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     },
     {
@@ -330,34 +406,36 @@ const Dashboard: React.FC = () => {
       icon: <RestaurantMenu />,
       color: '#E91E63',
       expandContent: (
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Kategoria</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Typ</TableCell>
+        <CompactTable color="#E91E63">
+          <StyledTableHead color="#E91E63">
+            <StyledHeaderCell color="#E91E63">Nazwa</StyledHeaderCell>
+            <StyledHeaderCell color="#E91E63">Kat.</StyledHeaderCell>
+            <StyledHeaderCell color="#E91E63">Typ</StyledHeaderCell>
+          </StyledTableHead>
+          <TableBody>
+            {menuItems.slice(0, 5).map((item, idx) => (
+              <TableRow key={item.id} sx={{ 
+                backgroundColor: idx % 2 === 0 ? '#ffffff08' : 'transparent',
+                borderBottom: '1px solid #ffffff10',
+                transition: 'all 0.2s ease',
+                '&:hover': { backgroundColor: '#E91E6312' },
+                height: '28px'
+              }}>
+                <StyledDataCell color="#e0e0e0" weight={500}>{item.name}</StyledDataCell>
+                <StyledDataCell color="#b0b0b0">
+                  {item.category === 'beverage' ? 'Napój' : 
+                   item.category === 'dessert' ? 'Deser' : 
+                   item.category === 'snack' ? 'Prz.' : 
+                   item.category === 'main' ? 'Główne' :
+                   item.category === 'breakfast' ? 'Śniad.' : 'Inn.'}
+                </StyledDataCell>
+                <StyledDataCell color="#b0b0b0">
+                  {item.dietary === 'vegan' ? '🌱' : item.dietary === 'vegetarian' ? '🥗' : '-'}
+                </StyledDataCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {menuItems.slice(0, 5).map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>
-                    {item.category === 'beverage' ? 'Napoje' : 
-                     item.category === 'dessert' ? 'Desery' : 
-                     item.category === 'snack' ? 'Przekąski' : 
-                     item.category === 'main' ? 'Dania główne' :
-                     item.category === 'breakfast' ? 'Śniadania' : 'Inne'}
-                  </TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>
-                    {item.dietary === 'vegan' ? '🌱 Vegan' : item.dietary === 'vegetarian' ? '🥗 Wegetariańskie' : 'Brak'}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </CompactTable>
       )
     }
   ];
@@ -373,9 +451,9 @@ const Dashboard: React.FC = () => {
         </Typography>
       </Box>
 
-<Grid container spacing={3}>
-  {stats.map((stat) => (
-    <Grid key={stat.key} size={{ xs: 12, sm: 6, md: 4 }}>
+      <Grid container spacing={3}>
+        {stats.map((stat) => (
+          <Grid key={stat.key} size={{ xs: 12, sm: 6, md: 4 }}>
             <StatCard
               icon={stat.icon}
               title={stat.title}
