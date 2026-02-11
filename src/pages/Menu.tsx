@@ -20,6 +20,28 @@ import { Edit, Delete, Add as AddIcon, ExpandMore } from '@mui/icons-material';
 import { useFirebase } from '../context/FirebaseContext';
 import { MenuItem as MenuItemType, MenuItemCategory } from '../types';
 
+const CATEGORIES = [
+  { value: 'coffee' as const, label: 'Kawy' },
+  { value: 'tea' as const, label: 'Herbaty' },
+  { value: 'beverage' as const, label: 'Napoje' },
+  { value: 'breakfast_sweet' as const, label: 'Śniadania na słodko' },
+  { value: 'breakfast_savory' as const, label: 'Śniadania na słono' },
+  { value: 'dessert' as const, label: 'Desery' },
+  { value: 'pastry_sweet' as const, label: 'Wypieki słodkie' },
+  { value: 'pastry_savory' as const, label: 'Wypieki słone' }
+];
+
+const CATEGORY_COLORS: { [key: string]: string } = {
+  'coffee': '#8B4513',
+  'tea': '#6B8E23',
+  'beverage': '#4169E1',
+  'breakfast_sweet': '#FFD700',
+  'breakfast_savory': '#FF8C00',
+  'dessert': '#FF69B4',
+  'pastry_sweet': '#F4A460',
+  'pastry_savory': '#CD853F'
+};
+
 export const Menu: React.FC = () => {
   const { menuItems, addMenuItem, updateMenuItem, deleteMenuItem } = useFirebase();
   const [openDialog, setOpenDialog] = useState(false);
@@ -35,31 +57,8 @@ export const Menu: React.FC = () => {
     notes: ''
   });
 
-  const categories = [
-    { value: 'coffee' as const, label: 'Kawy' },
-    { value: 'tea' as const, label: 'Herbaty' },
-    { value: 'beverage' as const, label: 'Napoje' },
-    { value: 'breakfast_sweet' as const, label: 'Śniadania na słodko' },
-    { value: 'breakfast_savory' as const, label: 'Śniadania na słono' },
-    { value: 'dessert' as const, label: 'Desery' },
-    { value: 'pastry_sweet' as const, label: 'Wypieki słodkie' },
-    { value: 'pastry_savory' as const, label: 'Wypieki słone' }
-  ];
-
-  const categoryColors: { [key: string]: string } = {
-    'coffee': '#8B4513',
-    'tea': '#6B8E23',
-    'beverage': '#4169E1',
-    'breakfast_sweet': '#FFD700',
-    'breakfast_savory': '#FF8C00',
-    'dessert': '#FF69B4',
-    'pastry_sweet': '#F4A460',
-    'pastry_savory': '#CD853F'
-  };
-
-  // Sortuj items według kategorii
   const sortedAndGroupedItems = useMemo(() => {
-    const grouped = categories.map(cat => ({
+    const grouped = CATEGORIES.map(cat => ({
       category: cat,
       items: menuItems.filter(item => item.category === cat.value)
     })).filter(group => group.items.length > 0);
@@ -114,11 +113,6 @@ export const Menu: React.FC = () => {
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    const cat = categories.find(c => c.value === category);
-    return cat ? cat.label : category;
-  };
-
   const getDietaryLabel = (dietary?: string) => {
     const labels: { [key: string]: string } = {
       'vegan': '🌱 Vegan',
@@ -162,7 +156,6 @@ export const Menu: React.FC = () => {
 
       {sortedAndGroupedItems.map((group) => (
         <Box key={group.category.value} sx={{ mb: 1 }}>
-          {/* Kategoria Header */}
           <Box
             onClick={() => toggleCategory(group.category.value)}
             sx={{
@@ -171,29 +164,29 @@ export const Menu: React.FC = () => {
               gap: 1.5,
               padding: '10px 12px',
               backgroundColor: '#ffffff08',
-              border: `1px solid ${categoryColors[group.category.value]}30`,
+              border: `1px solid ${CATEGORY_COLORS[group.category.value]}30`,
               borderRadius: '6px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               '&:hover': {
-                backgroundColor: `${categoryColors[group.category.value]}12`,
-                border: `1px solid ${categoryColors[group.category.value]}50`
+                backgroundColor: `${CATEGORY_COLORS[group.category.value]}12`,
+                border: `1px solid ${CATEGORY_COLORS[group.category.value]}50`
               }
             }}
           >
             <ExpandMore 
               sx={{
-                color: categoryColors[group.category.value],
+                color: CATEGORY_COLORS[group.category.value],
                 transform: expandedCategories[group.category.value] ? 'rotate(0deg)' : 'rotate(-90deg)',
                 transition: 'transform 0.2s ease',
                 fontSize: '1.2rem'
               }}
             />
-            <Box sx={{ width: '3px', height: '20px', backgroundColor: categoryColors[group.category.value] }} />
+            <Box sx={{ width: '3px', height: '20px', backgroundColor: CATEGORY_COLORS[group.category.value] }} />
             <Typography 
               sx={{ 
                 fontWeight: 600, 
-                color: categoryColors[group.category.value],
+                color: CATEGORY_COLORS[group.category.value],
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontSize: '0.85rem',
@@ -204,9 +197,8 @@ export const Menu: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* Items */}
           <Collapse in={expandedCategories[group.category.value]} timeout="auto">
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8, mt: 0.8, ml: 1.5, pl: 2, borderLeft: `2px solid ${categoryColors[group.category.value]}30` }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8, mt: 0.8, ml: 1.5, pl: 2, borderLeft: `2px solid ${CATEGORY_COLORS[group.category.value]}30` }}>
               {group.items.map((item) => (
                 <Box
                   key={item.id}
@@ -216,17 +208,17 @@ export const Menu: React.FC = () => {
                     gap: 1,
                     padding: '8px 10px',
                     backgroundColor: '#ffffff08',
-                    border: `1px solid ${categoryColors[item.category]}20`,
+                    border: `1px solid ${CATEGORY_COLORS[item.category]}20`,
                     borderRadius: '5px',
                     transition: 'all 0.2s ease',
                     '&:hover': {
-                      backgroundColor: `${categoryColors[item.category]}12`,
-                      border: `1px solid ${categoryColors[item.category]}40`,
+                      backgroundColor: `${CATEGORY_COLORS[item.category]}12`,
+                      border: `1px solid ${CATEGORY_COLORS[item.category]}40`,
                       transform: 'translateX(2px)'
                     }
                   }}
                 >
-                  <Box sx={{ width: '2px', height: '20px', backgroundColor: categoryColors[item.category] }} />
+                  <Box sx={{ width: '2px', height: '20px', backgroundColor: CATEGORY_COLORS[item.category] }} />
                   
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography 
@@ -268,7 +260,7 @@ export const Menu: React.FC = () => {
                       sx={{ 
                         fontSize: '0.8rem', 
                         fontWeight: 600, 
-                        color: categoryColors[item.category],
+                        color: CATEGORY_COLORS[item.category],
                         minWidth: '35px',
                         textAlign: 'right'
                       }}
@@ -279,7 +271,7 @@ export const Menu: React.FC = () => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenDialog(item)}
-                      sx={{ color: categoryColors[item.category], p: '4px' }}
+                      sx={{ color: CATEGORY_COLORS[item.category], p: '4px' }}
                     >
                       <Edit fontSize="small" sx={{ fontSize: '0.95rem' }} />
                     </IconButton>
@@ -369,7 +361,7 @@ export const Menu: React.FC = () => {
               }
             }}
           >
-            {categories.map(cat => (
+            {CATEGORIES.map(cat => (
               <MenuItem key={cat.value} value={cat.value}>{cat.label}</MenuItem>
             ))}
           </TextField>
