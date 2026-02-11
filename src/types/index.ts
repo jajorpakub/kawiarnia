@@ -87,12 +87,16 @@ export interface Location {
   updatedAt?: Date;
 }
 
+export type MenuItemCategory = 'beverage' | 'coffee' | 'tea' | 'breakfast' | 'breakfast_sweet' | 'breakfast_savory' | 'dessert' | 'pastry_sweet' | 'pastry_savory' | 'snack' | 'main' | 'other';
+
+export type MenuItemDietary = 'vegan' | 'vegetarian' | 'none';
+
 export interface MenuItem {
   id: string;
   name: string;
   description: string;
-  category: 'beverage' | 'dessert' | 'snack' | 'main' | 'breakfast' | 'other';
-  dietary?: 'vegan' | 'vegetarian' | 'none';
+  category: MenuItemCategory;
+  dietary?: MenuItemDietary;
   price?: number;
   notes?: string;
   createdAt?: Date;
