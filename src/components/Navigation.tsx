@@ -30,8 +30,6 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 
-const drawerWidth = 260;
-
 const menuItems = [
   { text: 'Panel główny', icon: <DashboardIcon />, path: '/', color: '#4CAF50' },
   { text: 'Lokale', icon: <LocationIcon />, path: '/lokale', color: '#FF5722' },
