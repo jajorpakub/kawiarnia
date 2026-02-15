@@ -19,6 +19,7 @@ const Dashboard: React.FC = () => {
   const totalTasks = tasks.length;
   const approvedFinancing = financing.reduce((sum, item) => sum + (item.approvedAmount || 0), 0);
   const upcomingEvents = events.filter(e => new Date(e.startDate) > new Date()).length;
+  const activeLocations = locations.filter(l => l.status !== 'rejected');
 
   const toggleExpand = (cardKey: string) => {
     setExpandedCards(prev => ({
@@ -499,12 +500,12 @@ const Dashboard: React.FC = () => {
     {
       key: 'locations',
       title: 'Lokale',
-      value: `${locations.length}`,
+      value: `${activeLocations.length}`,
       icon: <LocationOn />,
       color: '#FF5722',
       expandContent: (
         <ModernListContainer>
-          {locations.slice(0, 6).map((item) => (
+          {activeLocations.slice(0, 6).map((item) => (
             <ModernListItem 
               key={item.id}
               item={item}

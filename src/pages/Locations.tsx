@@ -114,6 +114,20 @@ export const Locations: React.FC = () => {
     return url;
   };
 
+  const getStatusPriority = (status?: string) => {
+    const priorities: { [key: string]: number } = {
+      'interested': 1,
+      'negotiating': 2,
+      'viewing': 3,
+      'rejected': 4
+    };
+    return priorities[status || 'default'] || 5;
+  };
+
+  const sortedLocations = [...locations].sort((a, b) => {
+    return getStatusPriority(a.status) - getStatusPriority(b.status);
+  });
+
   return (
     <Box sx={{ p: 3, maxWidth: '1400px', mx: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -157,7 +171,7 @@ export const Locations: React.FC = () => {
         </Box>
       ) : (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr', md: '1fr' }, gap: 2 }}>
-          {locations.map((location) => (
+          {sortedLocations.map((location) => (
             <Box
               key={location.id}
               sx={{
