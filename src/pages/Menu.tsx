@@ -14,7 +14,9 @@ import {
   RadioGroup,
   Radio,
   Typography,
-  Collapse
+  Collapse,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { Edit, Delete, Add as AddIcon, ExpandMore } from '@mui/icons-material';
 import { useFirebase } from '../context/FirebaseContext';
@@ -47,6 +49,8 @@ export const Menu: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({});
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [formData, setFormData] = useState<Omit<MenuItemType, 'id'>>({
     name: '',
@@ -134,9 +138,9 @@ export const Menu: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: '1400px', mx: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, color: '#e0e0e0' }}>
+    <Box sx={{ p: isMobile ? 1.5 : 3, maxWidth: isMobile ? '100%' : '1400px', mx: 'auto', width: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', mb: 3, flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+        <Typography variant={isMobile ? "h5" : "h4"} sx={{ fontWeight: 600, color: '#e0e0e0' }}>
           Menu
         </Typography>
         <Button 
@@ -147,7 +151,8 @@ export const Menu: React.FC = () => {
             backgroundColor: '#E91E63',
             '&:hover': {
               backgroundColor: '#C2185B'
-            }
+            },
+            width: isMobile ? '100%' : 'auto'
           }}
         >
           Dodaj
@@ -246,19 +251,19 @@ export const Menu: React.FC = () => {
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 0.5 : 1, whiteSpace: 'nowrap', flexShrink: 0, flexWrap: 'wrap' }}>
                     {item.dietary && item.dietary !== 'none' && (
                       <Chip
                         label={getDietaryLabel(item.dietary)}
                         size="small"
                         color={getDietaryColor(item.dietary)}
-                        sx={{ height: '18px', fontSize: '0.65rem' }}
+                        sx={{ height: isMobile ? '16px' : '18px', fontSize: isMobile ? '0.6rem' : '0.65rem' }}
                       />
                     )}
                     
                     <Typography 
                       sx={{ 
-                        fontSize: '0.8rem', 
+                        fontSize: isMobile ? '0.7rem' : '0.8rem', 
                         fontWeight: 600, 
                         color: CATEGORY_COLORS[item.category],
                         minWidth: '35px',
@@ -269,9 +274,9 @@ export const Menu: React.FC = () => {
                     </Typography>
 
                     <IconButton 
-                      size="small" 
+                      size={isMobile ? "small" : "medium"}
                       onClick={() => handleOpenDialog(item)}
-                      sx={{ color: CATEGORY_COLORS[item.category], p: '4px' }}
+                      sx={{ color: CATEGORY_COLORS[item.category], p: isMobile ? '2px' : '4px' }}
                     >
                       <Edit fontSize="small" sx={{ fontSize: '0.95rem' }} />
                     </IconButton>

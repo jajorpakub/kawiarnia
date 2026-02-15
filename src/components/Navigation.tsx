@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Drawer,
@@ -10,7 +10,11 @@ import {
   Toolbar,
   Typography,
   Box,
-  Divider
+  Divider,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+  AppBar
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -22,6 +26,8 @@ import {
   BorderColor as BorderColorIcon,
   LocationOn as LocationIcon,
   RestaurantMenu as MenuIcon,
+  Menu as MenuIconOpen,
+  Close as CloseIcon
 } from '@mui/icons-material';
 
 const drawerWidth = 260;
@@ -40,24 +46,14 @@ const menuItems = [
 const Navigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#1a1a1a',
-          borderRight: '1px solid #2a2a2a',
-          transition: 'all 0.3s ease'
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       {/* Header */}
       <Toolbar
         sx={{
@@ -66,7 +62,7 @@ const Navigation: React.FC = () => {
           alignItems: 'flex-start',
           justifyContent: 'flex-end',
           padding: '20px 16px',
-          minHeight: '120px',
+          minHeight: isMobile ? '100px' : '120px',
           background: 'linear-gradient(135deg, #4CAF5015 0%, #4CAF5008 100%)',
           borderBottom: '1px solid #4CAF5030',
           gap: 1
@@ -123,7 +119,10 @@ const Navigation: React.FC = () => {
           return (
             <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                  navigate(item.path);
+                  if (isMobile) setMobileOpen(false);
+                }}
                 selected={active}
                 sx={{
                   borderRadius: '8px',
@@ -190,6 +189,79 @@ const Navigation: React.FC = () => {
           v1.0.0
         </Typography>
       </Box>
+    </>
+  );
+
+  // Mobile: AppBar + Drawer
+  if (isMobile) {
+    return (
+      <>
+        <AppBar
+          position="fixed"
+          sx={{
+            backgroundColor: '#1a1a1a',
+            borderBottom: '1px solid #2a2a2a',
+            boxShadow: 'none',
+            zIndex: theme.zIndex.drawer + 1
+          }}
+        >
+          <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CoffeeIcon sx={{ color: '#4CAF50', fontSize: '1.5rem' }} />
+              <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#e0e0e0' }}>
+                Manager
+              </Typography>
+            </Box>
+            <IconButton
+              color="inherit"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              sx={{ color: '#4CAF50' }}
+            >
+              {mobileOpen ? <CloseIcon /> : <MenuIconOpen />}
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+
+        <Drawer
+          variant="temporary"
+          anchor="left"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          sx={{
+            width: 260,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: 260,
+              boxSizing: 'border-box',
+              backgroundColor: '#1a1a1a',
+              borderRight: '1px solid #2a2a2a',
+              marginTop: '56px'
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      </>
+    );
+  }
+
+  // Desktop: Permanent Drawer
+  return (
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: 260,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: {
+          width: 260,
+          boxSizing: 'border-box',
+          backgroundColor: '#1a1a1a',
+          borderRight: '1px solid #2a2a2a',
+          transition: 'all 0.3s ease'
+        },
+      }}
+    >
+      {drawerContent}
     </Drawer>
   );
 };

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
+import { useMediaQuery, useTheme } from '@mui/material';
 import Navigation from './components/Navigation';
 import Dashboard from './pages/Dashboard';
 import CostEstimates from './pages/CostEstimates';
@@ -37,14 +38,26 @@ const theme = createTheme({
 });
 
 function App() {
+  const appTheme = useTheme();
+  const isMobile = useMediaQuery(appTheme.breakpoints.down('md'));
+
   return (
     <FirebaseProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             <Navigation />
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Box 
+              component="main" 
+              sx={{ 
+                flexGrow: 1, 
+                p: isMobile ? 2 : 3,
+                pt: isMobile ? '80px' : 3,
+                width: '100%',
+                overflow: 'auto'
+              }}
+            >
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/lokale" element={<Locations />} />

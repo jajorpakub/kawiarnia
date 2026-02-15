@@ -6,26 +6,24 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-  Paper,
   IconButton,
   Box,
   MenuItem,
   Chip,
-  Tabs,
-  Tab,
   Typography,
-  Link,
+  Link as MuiLink,
+  Tabs,
+  Tab
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
-import OpenInNew from '@mui/icons-material/OpenInNew';
+import { Edit, Delete, Add as AddIcon, OpenInNew } from '@mui/icons-material';
 import { useFirebase } from '../context/FirebaseContext';
 import { CostEstimateItem, Supplier, Equipment } from '../types';
+
+const COLORS = {
+  costEstimate: '#4CAF50',
+  supplier: '#9C27B0',
+  equipment: '#2196F3'
+};
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -36,12 +34,8 @@ interface TabPanelProps {
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+    <div role="tabpanel" hidden={value !== index} {...other}>
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -56,7 +50,6 @@ export const Procurement: React.FC = () => {
   const [dialogType, setDialogType] = useState<'costEstimate' | 'supplier' | 'equipment'>('costEstimate');
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Cost Estimate Form
   const [costFormData, setCostFormData] = useState<Omit<CostEstimateItem, 'id'>>({
     name: '',
     quantity: 1,
@@ -66,7 +59,6 @@ export const Procurement: React.FC = () => {
     notes: ''
   });
 
-  // Supplier Form
   const [supplierFormData, setSupplierFormData] = useState<Omit<Supplier, 'id'>>({
     name: '',
     contact: '',
@@ -75,7 +67,6 @@ export const Procurement: React.FC = () => {
     notes: ''
   });
 
-  // Equipment Form
   const [equipmentFormData, setEquipmentFormData] = useState<Omit<Equipment, 'id'>>({
     name: '',
     quantity: 1,
@@ -85,6 +76,23 @@ export const Procurement: React.FC = () => {
     status: 'pending',
     notes: ''
   });
+
+  const isValidUrl = (string: string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const ensureUrlProtocol = (url: string) => {
+    if (!url) return '';
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return 'https://' + url;
+    }
+    return url;
+  };
 
   const handleOpenDialog = (type: 'costEstimate' | 'supplier' | 'equipment', item?: any) => {
     setDialogType(type);
@@ -158,13 +166,10 @@ export const Procurement: React.FC = () => {
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'done':
       case 'received':
         return 'success';
-      case 'in-progress':
       case 'ordered':
         return 'warning';
-      case 'todo':
       case 'pending':
         return 'info';
       default:
@@ -174,9 +179,6 @@ export const Procurement: React.FC = () => {
 
   const getStatusLabel = (status?: string) => {
     const labels: { [key: string]: string } = {
-      'done': 'Ukończone',
-      'in-progress': 'W trakcie',
-      'todo': 'Do zrobienia',
       'received': 'Otrzymane',
       'ordered': 'Zamówione',
       'pending': 'Oczekujące'
@@ -184,308 +186,350 @@ export const Procurement: React.FC = () => {
     return labels[status || 'default'] || status || 'Brak statusu';
   };
 
-  return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" gutterBottom>Procurement & Zaopatrzenie</Typography>
+  const CostEstimateCard = ({ item }: { item: CostEstimateItem }) => (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        padding: '14px 16px',
+        background: `linear-gradient(135deg, ${COLORS.costEstimate}15 0%, ${COLORS.costEstimate}08 100%)`,
+        border: `1px solid ${COLORS.costEstimate}30`,
+        borderRadius: '8px',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          boxShadow: `0 8px 24px ${COLORS.costEstimate}20`,
+          border: `1px solid ${COLORS.costEstimate}50`,
+          transform: 'translateY(-2px)'
+        }
+      }}
+    >
+      <Box sx={{ width: '4px', height: '60px', backgroundColor: COLORS.costEstimate, borderRadius: '2px', flexShrink: 0 }} />
       
-      <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
-        <Tab label={`Kosztorysy (${costEstimates.length})`} />
-        <Tab label={`Dostawcy (${suppliers.length})`} />
-        <Tab label={`Wyposażenie (${equipment.length})`} />
-      </Tabs>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#e0e0e0', mb: 0.5 }}>
+          {item.name}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={{ fontSize: '0.8rem', color: '#b0b0b0' }}>
+            {item.quantity}x {item.unitPrice.toFixed(2)} zł
+          </Typography>
+          <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: COLORS.costEstimate }}>
+            = {item.total.toFixed(2)} zł
+          </Typography>
+        </Box>
+        {item.notes && <Typography sx={{ fontSize: '0.75rem', color: '#909090', mt: 0.5, fontStyle: 'italic' }}>{item.notes}</Typography>}
+      </Box>
 
-      {/* Cost Estimates Tab */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+        {item.link && isValidUrl(ensureUrlProtocol(item.link)) && (
+          <MuiLink 
+            href={ensureUrlProtocol(item.link)}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: COLORS.costEstimate,
+              textDecoration: 'none',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              padding: '6px 10px',
+              borderRadius: '5px',
+              backgroundColor: `${COLORS.costEstimate}12`,
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap',
+              '&:hover': {
+                backgroundColor: `${COLORS.costEstimate}20`,
+                gap: '6px'
+              }
+            }}
+          >
+            <OpenInNew sx={{ fontSize: '0.95rem' }} />
+            Link
+          </MuiLink>
+        )}
+        <IconButton size="small" onClick={() => handleOpenDialog('costEstimate', item)} sx={{ color: COLORS.costEstimate, p: '6px' }}>
+          <Edit fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={() => handleDelete('costEstimate', item.id)} sx={{ color: '#FF6B6B', p: '6px' }}>
+          <Delete fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+
+  const SupplierCard = ({ supplier }: { supplier: Supplier }) => (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        padding: '14px 16px',
+        background: `linear-gradient(135deg, ${COLORS.supplier}15 0%, ${COLORS.supplier}08 100%)`,
+        border: `1px solid ${COLORS.supplier}30`,
+        borderRadius: '8px',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          boxShadow: `0 8px 24px ${COLORS.supplier}20`,
+          border: `1px solid ${COLORS.supplier}50`,
+          transform: 'translateY(-2px)'
+        }
+      }}
+    >
+      <Box sx={{ width: '4px', height: '60px', backgroundColor: COLORS.supplier, borderRadius: '2px', flexShrink: 0 }} />
+      
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#e0e0e0', mb: 0.5 }}>
+          {supplier.name}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={{ fontSize: '0.8rem', color: '#b0b0b0' }}>
+            👤 {supplier.contact}
+          </Typography>
+          <Typography sx={{ fontSize: '0.8rem', color: '#b0b0b0' }}>
+            📧 {supplier.email}
+          </Typography>
+          <Typography sx={{ fontSize: '0.8rem', color: '#b0b0b0' }}>
+            📱 {supplier.phone}
+          </Typography>
+        </Box>
+        {supplier.notes && <Typography sx={{ fontSize: '0.75rem', color: '#909090', mt: 0.5, fontStyle: 'italic' }}>{supplier.notes}</Typography>}
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+        <IconButton size="small" onClick={() => handleOpenDialog('supplier', supplier)} sx={{ color: COLORS.supplier, p: '6px' }}>
+          <Edit fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={() => handleDelete('supplier', supplier.id)} sx={{ color: '#FF6B6B', p: '6px' }}>
+          <Delete fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+
+  const EquipmentCard = ({ item }: { item: Equipment }) => (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        padding: '14px 16px',
+        background: `linear-gradient(135deg, ${COLORS.equipment}15 0%, ${COLORS.equipment}08 100%)`,
+        border: `1px solid ${COLORS.equipment}30`,
+        borderRadius: '8px',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          boxShadow: `0 8px 24px ${COLORS.equipment}20`,
+          border: `1px solid ${COLORS.equipment}50`,
+          transform: 'translateY(-2px)'
+        }
+      }}
+    >
+      <Box sx={{ width: '4px', height: '60px', backgroundColor: COLORS.equipment, borderRadius: '2px', flexShrink: 0 }} />
+      
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#e0e0e0', mb: 0.5 }}>
+          {item.name}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={{ fontSize: '0.8rem', color: '#b0b0b0' }}>
+            Ilość: {item.quantity}
+          </Typography>
+          {item.supplier && <Typography sx={{ fontSize: '0.8rem', color: '#b0b0b0' }}>Dostawca: {item.supplier}</Typography>}
+          <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} sx={{ height: '20px', fontSize: '0.7rem' }} />
+        </Box>
+        {item.notes && <Typography sx={{ fontSize: '0.75rem', color: '#909090', mt: 0.5, fontStyle: 'italic' }}>{item.notes}</Typography>}
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+        {item.link && isValidUrl(ensureUrlProtocol(item.link)) && (
+          <MuiLink 
+            href={ensureUrlProtocol(item.link)}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: COLORS.equipment,
+              textDecoration: 'none',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              padding: '6px 10px',
+              borderRadius: '5px',
+              backgroundColor: `${COLORS.equipment}12`,
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap',
+              '&:hover': {
+                backgroundColor: `${COLORS.equipment}20`,
+                gap: '6px'
+              }
+            }}
+          >
+            <OpenInNew sx={{ fontSize: '0.95rem' }} />
+            Link
+          </MuiLink>
+        )}
+        <IconButton size="small" onClick={() => handleOpenDialog('equipment', item)} sx={{ color: COLORS.equipment, p: '6px' }}>
+          <Edit fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={() => handleDelete('equipment', item.id)} sx={{ color: '#FF6B6B', p: '6px' }}>
+          <Delete fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ p: 3, maxWidth: '1400px', mx: 'auto' }}>
+      <Typography variant="h4" sx={{ fontWeight: 600, color: '#e0e0e0', mb: 3 }}>
+        Procurement & Zaopatrzenie
+      </Typography>
+      
+      <Box sx={{ borderBottom: '1px solid #2a2a2a', mb: 0 }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={(e, newValue) => setTabValue(newValue)}
+          sx={{
+            '& .MuiTab-root': {
+              color: '#b0b0b0',
+              textTransform: 'none',
+              fontSize: '0.9rem',
+              fontWeight: 500
+            },
+            '& .Mui-selected': {
+              color: '#e0e0e0'
+            },
+            '& .MuiTabs-indicator': {
+              height: '3px'
+            }
+          }}
+        >
+          <Tab label={`Kosztorysy (${costEstimates.length})`} />
+          <Tab label={`Dostawcy (${suppliers.length})`} />
+          <Tab label={`Wyposażenie (${equipment.length})`} />
+        </Tabs>
+      </Box>
+
       <TabPanel value={tabValue} index={0}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button variant="contained" onClick={() => handleOpenDialog('costEstimate')}>
-            + Dodaj kosztorys
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+          <Button 
+            variant="contained" 
+            onClick={() => handleOpenDialog('costEstimate')}
+            startIcon={<AddIcon />}
+            sx={{ backgroundColor: COLORS.costEstimate, '&:hover': { backgroundColor: '#45a049' } }}
+          >
+            Dodaj kosztorys
           </Button>
         </Box>
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Cena jedn.</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Razem</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Link</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Notatki</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }} align="center">Akcje</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {costEstimates.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.unitPrice.toFixed(2)} zł</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.total.toFixed(2)} zł</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>
-                  {item.link ? (
-                    <Link href={item.link} target="_blank" rel="noopener noreferrer" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8B4513' }}>
-                      Obejrzyj
-                      <OpenInNew sx={{ fontSize: 16 }} />
-                    </Link>
-                  ) : (
-                    '-'
-                  )}
-                </TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.notes || '-'}</TableCell>
-                  <TableCell align="center">
-                    <IconButton size="small" onClick={() => handleOpenDialog('costEstimate', item)}>
-                      <Edit sx={{ color: '#e0e0e0' }} />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleDelete('costEstimate', item.id)}>
-                      <Delete sx={{ color: '#e0e0e0' }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {costEstimates.length === 0 ? (
+          <Typography sx={{ color: '#b0b0b0', textAlign: 'center', py: 4 }}>
+            Brak kosztorysów
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {costEstimates.map(item => <CostEstimateCard key={item.id} item={item} />)}
+          </Box>
+        )}
       </TabPanel>
 
-      {/* Suppliers Tab */}
       <TabPanel value={tabValue} index={1}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button variant="contained" onClick={() => handleOpenDialog('supplier')}>
-            + Dodaj dostawcę
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+          <Button 
+            variant="contained" 
+            onClick={() => handleOpenDialog('supplier')}
+            startIcon={<AddIcon />}
+            sx={{ backgroundColor: COLORS.supplier, '&:hover': { backgroundColor: '#7B1FA2' } }}
+          >
+            Dodaj dostawcę
           </Button>
         </Box>
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Osoba kontaktowa</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Email</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Telefon</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Notatki</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }} align="center">Akcje</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {suppliers.map((supplier) => (
-                <TableRow key={supplier.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.name}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.contact}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.email}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.phone}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{supplier.notes || '-'}</TableCell>
-                  <TableCell align="center">
-                    <IconButton size="small" onClick={() => handleOpenDialog('supplier', supplier)}>
-                      <Edit sx={{ color: '#e0e0e0' }} />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleDelete('supplier', supplier.id)}>
-                      <Delete sx={{ color: '#e0e0e0' }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {suppliers.length === 0 ? (
+          <Typography sx={{ color: '#b0b0b0', textAlign: 'center', py: 4 }}>
+            Brak dostawców
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {suppliers.map(supplier => <SupplierCard key={supplier.id} supplier={supplier} />)}
+          </Box>
+        )}
       </TabPanel>
 
-      {/* Equipment Tab */}
       <TabPanel value={tabValue} index={2}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button variant="contained" onClick={() => handleOpenDialog('equipment')}>
-            + Dodaj wyposażenie
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+          <Button 
+            variant="contained" 
+            onClick={() => handleOpenDialog('equipment')}
+            startIcon={<AddIcon />}
+            sx={{ backgroundColor: COLORS.equipment, '&:hover': { backgroundColor: '#1976D2' } }}
+          >
+            Dodaj wyposażenie
           </Button>
         </Box>
-        <TableContainer component={Paper} sx={{ bgcolor: '#1e1e1e' }}>
-          <Table size="small" sx={{ '& tbody tr:hover': { bgcolor: '#2a2a2a' } }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#2a2a2a' }}>
-                <TableCell sx={{ color: '#e0e0e0' }}>Nazwa</TableCell>
-                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Ilość</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Dostawca</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Status</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Link</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }}>Notatki</TableCell>
-                <TableCell sx={{ color: '#e0e0e0' }} align="center">Akcje</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {equipment.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.name}</TableCell>
-                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{item.quantity}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.supplier || '-'}</TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>
-                    <Chip label={getStatusLabel(item.status)} size="small" color={getStatusColor(item.status)} />
-                  </TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>
-                  {item.link ? (
-                    <Link href={item.link} target="_blank" rel="noopener noreferrer" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8B4513' }}>
-                      Obejrzyj
-                      <OpenInNew sx={{ fontSize: 16 }} />
-                    </Link>
-                  ) : (
-                    '-'
-                  )}
-                </TableCell>
-                  <TableCell sx={{ color: '#e0e0e0' }}>{item.notes || '-'}</TableCell>
-                  <TableCell align="center">
-                    <IconButton size="small" onClick={() => handleOpenDialog('equipment', item)}>
-                      <Edit sx={{ color: '#e0e0e0' }} />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleDelete('equipment', item.id)}>
-                      <Delete sx={{ color: '#e0e0e0' }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {equipment.length === 0 ? (
+          <Typography sx={{ color: '#b0b0b0', textAlign: 'center', py: 4 }}>
+            Brak wyposażenia
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {equipment.map(item => <EquipmentCard key={item.id} item={item} />)}
+          </Box>
+        )}
       </TabPanel>
 
-      {/* Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ backgroundColor: '#1e1e1e', color: '#e0e0e0' }}>
           {dialogType === 'costEstimate' && (editingId ? 'Edytuj kosztorys' : 'Dodaj kosztorys')}
           {dialogType === 'supplier' && (editingId ? 'Edytuj dostawcę' : 'Dodaj dostawcę')}
           {dialogType === 'equipment' && (editingId ? 'Edytuj wyposażenie' : 'Dodaj wyposażenie')}
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2, backgroundColor: '#1e1e1e' }}>
           {dialogType === 'costEstimate' && (
             <>
-              <TextField
-                label="Nazwa"
-                value={costFormData.name}
-                onChange={(e) => setCostFormData({ ...costFormData, name: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Ilość"
-                type="number"
-                value={costFormData.quantity}
-                onChange={(e) => setCostFormData({ ...costFormData, quantity: parseFloat(e.target.value) })}
-                fullWidth
-              />
-              <TextField
-                label="Cena jednostkowa (zł)"
-                type="number"
-                value={costFormData.unitPrice}
-                onChange={(e) => setCostFormData({ ...costFormData, unitPrice: parseFloat(e.target.value) })}
-                fullWidth
-              />
-              <TextField
-                label="Link do produktu"
-                value={costFormData.link || ''}
-                onChange={(e) => setCostFormData({ ...costFormData, link: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Notatki"
-                value={costFormData.notes || ''}
-                onChange={(e) => setCostFormData({ ...costFormData, notes: e.target.value })}
-                multiline
-                rows={3}
-                fullWidth
-              />
+              <TextField label="Nazwa" value={costFormData.name} onChange={(e) => setCostFormData({ ...costFormData, name: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Ilość" type="number" value={costFormData.quantity} onChange={(e) => setCostFormData({ ...costFormData, quantity: parseFloat(e.target.value) })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Cena jednostkowa (zł)" type="number" value={costFormData.unitPrice} onChange={(e) => setCostFormData({ ...costFormData, unitPrice: parseFloat(e.target.value) })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Link do produktu" value={costFormData.link || ''} onChange={(e) => setCostFormData({ ...costFormData, link: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Notatki" value={costFormData.notes || ''} onChange={(e) => setCostFormData({ ...costFormData, notes: e.target.value })} multiline rows={3} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
             </>
           )}
           {dialogType === 'supplier' && (
             <>
-              <TextField
-                label="Nazwa"
-                value={supplierFormData.name}
-                onChange={(e) => setSupplierFormData({ ...supplierFormData, name: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Osoba kontaktowa"
-                value={supplierFormData.contact}
-                onChange={(e) => setSupplierFormData({ ...supplierFormData, contact: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Email"
-                type="email"
-                value={supplierFormData.email}
-                onChange={(e) => setSupplierFormData({ ...supplierFormData, email: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Telefon"
-                value={supplierFormData.phone}
-                onChange={(e) => setSupplierFormData({ ...supplierFormData, phone: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Notatki"
-                value={supplierFormData.notes || ''}
-                onChange={(e) => setSupplierFormData({ ...supplierFormData, notes: e.target.value })}
-                multiline
-                rows={3}
-                fullWidth
-              />
+              <TextField label="Nazwa" value={supplierFormData.name} onChange={(e) => setSupplierFormData({ ...supplierFormData, name: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Osoba kontaktowa" value={supplierFormData.contact} onChange={(e) => setSupplierFormData({ ...supplierFormData, contact: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Email" type="email" value={supplierFormData.email} onChange={(e) => setSupplierFormData({ ...supplierFormData, email: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Telefon" value={supplierFormData.phone} onChange={(e) => setSupplierFormData({ ...supplierFormData, phone: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Notatki" value={supplierFormData.notes || ''} onChange={(e) => setSupplierFormData({ ...supplierFormData, notes: e.target.value })} multiline rows={3} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
             </>
           )}
           {dialogType === 'equipment' && (
             <>
-              <TextField
-                label="Nazwa"
-                value={equipmentFormData.name}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, name: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Ilość"
-                type="number"
-                value={equipmentFormData.quantity}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, quantity: parseFloat(e.target.value) })}
-                fullWidth
-              />
-              <TextField
-                label="Cena jednostkowa (zł)"
-                type="number"
-                value={equipmentFormData.unitPrice}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, unitPrice: parseFloat(e.target.value) })}
-                fullWidth
-              />
-              <TextField
-                label="Dostawca"
-                value={equipmentFormData.supplier || ''}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, supplier: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                select
-                label="Status"
-                value={equipmentFormData.status || 'pending'}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, status: e.target.value as any })}
-                fullWidth
-              >
+              <TextField label="Nazwa" value={equipmentFormData.name} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, name: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Ilość" type="number" value={equipmentFormData.quantity} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, quantity: parseFloat(e.target.value) })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Cena jednostkowa (zł)" type="number" value={equipmentFormData.unitPrice} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, unitPrice: parseFloat(e.target.value) })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Dostawca" value={equipmentFormData.supplier || ''} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, supplier: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField select label="Status" value={equipmentFormData.status || 'pending'} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, status: e.target.value as any })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }}>
                 <MenuItem value="pending">Oczekujące</MenuItem>
                 <MenuItem value="ordered">Zamówione</MenuItem>
                 <MenuItem value="received">Otrzymane</MenuItem>
               </TextField>
-              <TextField
-                label="Link do produktu"
-                value={equipmentFormData.link || ''}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, link: e.target.value })}
-                fullWidth
-              />
-              <TextField
-                label="Notatki"
-                value={equipmentFormData.notes || ''}
-                onChange={(e) => setEquipmentFormData({ ...equipmentFormData, notes: e.target.value })}
-                multiline
-                rows={3}
-                fullWidth
-              />
+              <TextField label="Link do produktu" value={equipmentFormData.link || ''} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, link: e.target.value })} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
+              <TextField label="Notatki" value={equipmentFormData.notes || ''} onChange={(e) => setEquipmentFormData({ ...equipmentFormData, notes: e.target.value })} multiline rows={3} fullWidth sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' } }} />
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Anuluj</Button>
-          <Button onClick={handleSave} variant="contained">
+        <DialogActions sx={{ backgroundColor: '#1e1e1e', p: 2 }}>
+          <Button onClick={handleCloseDialog} sx={{ color: '#e0e0e0' }}>Anuluj</Button>
+          <Button 
+            onClick={handleSave} 
+            variant="contained"
+            sx={{
+              backgroundColor: dialogType === 'costEstimate' ? COLORS.costEstimate : dialogType === 'supplier' ? COLORS.supplier : COLORS.equipment,
+              '&:hover': { backgroundColor: dialogType === 'costEstimate' ? '#45a049' : dialogType === 'supplier' ? '#7B1FA2' : '#1976D2' }
+            }}
+          >
             {editingId ? 'Aktualizuj' : 'Dodaj'}
           </Button>
         </DialogActions>

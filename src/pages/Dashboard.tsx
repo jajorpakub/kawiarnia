@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, Typography, Box, 
-  Collapse, IconButton, Chip, Link as MuiLink
+  Collapse, IconButton, Chip, Link as MuiLink, useMediaQuery, useTheme
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { TrendingUp, AttachMoney, ShoppingCart, AssignmentTurnedIn, ExpandMore, AccountBalance, Event as EventIcon, LocationOn, RestaurantMenu, OpenInNew, Edit } from '@mui/icons-material';
@@ -10,6 +10,9 @@ import { useFirebase } from '../context/FirebaseContext';
 const Dashboard: React.FC = () => {
   const { costEstimates, equipment, tasks, suppliers, financing, events, locations, menuItems } = useFirebase();
   const [expandedCards, setExpandedCards] = useState<{ [key: string]: boolean }>({});
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
 
   const totalBudget = costEstimates.reduce((sum, item) => sum + item.total, 0);
   const completedTasks = tasks.filter(t => t.status === 'done').length;
@@ -198,8 +201,9 @@ const Dashboard: React.FC = () => {
     </Box>
   );
 
-  const StatCard = ({ icon, title, value, color, expanded, onToggle, expandContent }: any) => (
+  const StatCard = ({ icon, title, value, color, expanded, onToggle, expandContent, isMobile }: any) => (
     <Card
+      onClick={() => onToggle()}
       sx={{
         height: '100%',
         width: '100%',
@@ -209,19 +213,27 @@ const Dashboard: React.FC = () => {
         border: `1px solid ${color}30`,
         transition: 'all 0.3s ease',
         cursor: 'pointer',
+        userSelect: 'none',
+        touchAction: 'manipulation',
         '&:hover': {
           boxShadow: `0 8px 24px ${color}20`,
-          transform: 'translateY(-2px)',
+          transform: isMobile ? 'none' : 'translateY(-2px)',
           border: `1px solid ${color}50`
+        },
+        '&:active': {
+          transform: 'scale(0.98)'
         }
       }}
     >
       <CardHeader
-        avatar={<Box sx={{ color, fontSize: 40 }}>{icon}</Box>}
-        title={<Typography sx={{ fontSize: '1.4rem', fontWeight: 500, color: '#e0e0e0', textAlign: 'center' }}>{title}</Typography>}
+        avatar={<Box sx={{ color, fontSize: isMobile ? 28 : 40 }}>{icon}</Box>}
+        title={<Typography sx={{ fontSize: isMobile ? '1rem' : '1.4rem', fontWeight: 500, color: '#e0e0e0', textAlign: 'center' }}>{title}</Typography>}
         action={
           <IconButton
-            onClick={() => onToggle()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
             size="small"
             sx={{
               color,
@@ -233,8 +245,8 @@ const Dashboard: React.FC = () => {
           </IconButton>
         }
         sx={{ 
-          pb: 2, 
-          pt: 2,
+          pb: isMobile ? 1 : 2, 
+          pt: isMobile ? 1 : 2,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -246,13 +258,13 @@ const Dashboard: React.FC = () => {
           }
         }}
       />
-      <CardContent sx={{ flex: 1 }} />
+      <CardContent sx={{ flex: 1, pb: isMobile ? 0 : 1 }} />
       <Collapse in={expanded} timeout="auto">
         <CardContent sx={{ 
           pt: 1, 
           pb: 1, 
           borderTop: `1px solid ${color}20`,
-          maxHeight: '280px',
+          maxHeight: isMobile ? '200px' : '280px',
           overflow: 'auto'
         }}>
           {expandContent}
@@ -553,19 +565,31 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ p: 4, maxWidth: '1600px', mx: 'auto' }}>
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: '#e0e0e0' }}>
+    <Box sx={{ 
+      px: isMobile ? 1 : 4, 
+      py: isMobile ? 2 : 4, 
+      maxWidth: isMobile ? '100%' : '1600px', 
+      mx: 'auto',
+      width: '100%'
+    }}>
+      <Box sx={{ textAlign: 'center', mb: isMobile ? 3 : 6 }}>
+        <Typography 
+          variant={isMobile ? "h4" : "h3"} 
+          sx={{ fontWeight: 700, mb: 1, color: '#e0e0e0', fontSize: isMobile ? '1.5rem' : '2.5rem' }}
+        >
           Panel główny
         </Typography>
-        <Typography variant="body1" sx={{ color: '#b0b0b0' }}>
+        <Typography 
+          variant="body1" 
+          sx={{ color: '#b0b0b0', fontSize: isMobile ? '0.85rem' : '1rem' }}
+        >
           Przygotowania do otwarcia kawiarni
         </Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
+      <Grid container spacing={isMobile ? 1.5 : 3} sx={{ alignItems: 'flex-start' }}>
         {stats.map((stat) => (
-          <Grid key={stat.key} size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex' }}>
+          <Grid key={stat.key} size={{ xs: 12, sm: 6, md: isTablet ? 6 : 4 }} sx={{ display: 'flex' }}>
             <Box sx={{ width: '100%' }}>
               <StatCard
                 icon={stat.icon}
@@ -575,6 +599,7 @@ const Dashboard: React.FC = () => {
                 expanded={expandedCards[stat.key]}
                 onToggle={() => toggleExpand(stat.key)}
                 expandContent={stat.expandContent}
+                isMobile={isMobile}
               />
             </Box>
           </Grid>
